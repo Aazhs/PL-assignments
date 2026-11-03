@@ -1,14 +1,21 @@
 #include <iostream>
 using namespace std;
 
+// Round Robin CPU scheduling using a circular queue.
+// Round Robin: every process gets the CPU for at most 'quantum' time units.
+// If it is not finished by then, it goes to the back of the queue and waits
+// for its next turn. This repeats until all processes are done.
+
 const int MAX = 5;
 
-// Circular queue storing indices of processes waiting for the CPU
+// Circular queue storing indices of processes waiting for the CPU.
+// "Circular" = when rear/front reach the end of the array they wrap back to 0,
+// so freed slots at the start get reused.
 class CircularQueue {
     int arr[MAX];
-    int front;
-    int rear;
-    int count;
+    int front;  // index of the first item (next to be removed)
+    int rear;   // index of the last item (most recently added)
+    int count;  // number of items; makes empty/full checks easy
 
 public:
     CircularQueue() {
@@ -59,12 +66,15 @@ public:
     }
 };
 
+// Holds process data and runs the Round Robin simulation.
+// AT = arrival time, BT = burst time (CPU time needed), CT = completion time,
+// TAT = turnaround time, WT = waiting time
 class RoundRobin {
     int n;
     int quantum;
     int arrival[MAX];
     int burst[MAX];
-    int remaining[MAX];
+    int remaining[MAX];  // CPU time still needed by each process
     int completion[MAX];
     int turnaround[MAX];
     int waiting[MAX];
@@ -73,6 +83,7 @@ public:
     RoundRobin(int q) {
         n = MAX;
         quantum = q;
+        // Fixed sample data for 5 processes (P1..P5)
         int at[MAX] = {0, 1, 2, 3, 4};
         int bt[MAX] = {5, 3, 1, 2, 3};
         for (int i = 0; i < n; i++) {
@@ -84,8 +95,8 @@ public:
 
     void schedule() {
         CircularQueue q;
-        bool added[MAX] = {false};
-        int time = 0, done = 0;
+        bool added[MAX] = {false};  // added[i] = has process i entered the queue yet?
+        int time = 0, done = 0;     // current clock time, number of finished processes
 
         cout << "\nGantt chart:\n";
         while (done < n) {

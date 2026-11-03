@@ -3,6 +3,13 @@
 #include "stack.cpp"
 using namespace std;
 
+// Expression conversion using a stack.
+//   Infix   : A + B   (operator between operands, how we normally write)
+//   Postfix : A B +   (operator after operands)
+//   Prefix  : + A B   (operator before operands)
+// Postfix/prefix need no brackets, which makes them easy for computers to evaluate.
+
+// Operator priority (same as the one inside the class): higher number = applied first
 int precedence(char operation)
 {
     switch (operation)
@@ -41,6 +48,7 @@ private:
         }
     }
 
+    // Operand = a letter or digit (A, b, 5 ...)
     bool isOperand(char value)
     {
         return (value >= 'A' && value <= 'Z') ||
@@ -55,6 +63,8 @@ private:
     }
 
 public:
+    // Infix -> Postfix: operands go straight to the output; operators wait on
+    // the stack until an operator of lower priority (or ')') forces them out.
     string infixToPostfix(const string &infix)
     {
         Stack operators;
@@ -76,6 +86,7 @@ public:
             }
             else if (value == '(')
             {
+                // '(' is pushed and acts as a wall until its ')' arrives
                 operators.push(string(1, value));
             }
             else if (value == ')')
@@ -111,6 +122,9 @@ public:
         return postfix;
     }
 
+    // Postfix -> Infix: read left to right. Operands are pushed; an operator
+    // pops two operands, joins them as "(left op right)" and pushes that back.
+    // At the end, the only item left on the stack is the full expression.
     string postfixToInfix(const string &postfix)
     {
         Stack operands;
@@ -139,6 +153,7 @@ public:
         return operands.isEmpty() ? "" : operands.pop();
     }
 
+    // Prefix -> Infix: same idea as postfix, but read the string RIGHT to LEFT
     string prefixToInfix(const string &prefix)
     {
         Stack operands;

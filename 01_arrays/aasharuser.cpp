@@ -2,6 +2,8 @@
 
 using namespace std;
 
+// One Aadhar record. main.cpp keeps an array of these objects
+// and does insert / update / delete / search on that array.
 class AadharUser {
 public:
 	int aadharNumber;
@@ -9,6 +11,7 @@ public:
 	char dob[20];
 	char address[100];
 
+	// Read all details of this person from the keyboard
 	void inputAadhar() {
 		cout << "Enter Aadhar number: ";
 		cin >> aadharNumber;
@@ -16,7 +19,7 @@ public:
 		cin.ignore();
 
 		cout << "Enter name: ";
-		cin.getline(name, 50);
+		cin.getline(name, 50);  // getline reads the full line, so names with spaces work
 
 		cout << "Enter date of birth: ";
 		cin.getline(dob, 20);
@@ -25,6 +28,7 @@ public:
 		cin.getline(address, 100);
 	}
 
+	// Print all details of this person
 	void viewAadhar() const {
 		cout << "Aadhar Number: " << aadharNumber << '\n';
 		cout << "Name: " << name << '\n';

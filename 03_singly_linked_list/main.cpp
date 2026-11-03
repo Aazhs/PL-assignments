@@ -2,6 +2,11 @@
 
 using namespace std;
 
+// Singly linked list: a chain of nodes, each holding a value and a pointer
+// to the next node.   head -> [10] -> [20] -> [30] -> nullptr
+// We can only move forward, so to reach a node we must start at head and walk.
+
+// One box in the chain: the value + address of the next box
 class Node {
 	public:
 		int data;
@@ -15,13 +20,14 @@ class Node {
 
 class LinkedList {
 	public:
-		Node* head;
-		int size;
+		Node* head;  // first node; nullptr means the list is empty
+		int size;    // number of nodes, updated on every insert/delete
 		LinkedList() {
 			head = nullptr;
 			size = 0;
 		}
 
+		// Destructor: free every node one by one so no memory is leaked
 		~LinkedList() {
 			while (head != nullptr) {
 				Node* temp = head;
@@ -30,6 +36,7 @@ class LinkedList {
 			}
 		}
 
+		// New node points to the old head, then becomes the new head. O(1)
 		void insertAtBeginning(int val) {
 			Node* newNode = new Node(val);
 			newNode->next = head;
@@ -38,6 +45,7 @@ class LinkedList {
 			cout << "Inserted " << val << " at the beginning.\n";
 		}
 
+		// Walk to the last node (whose next is nullptr) and attach the new node there
 		void insertAtEnd(int val) {
 			Node* newNode = new Node(val);
 
@@ -58,6 +66,7 @@ class LinkedList {
 			cout << "Inserted " << val << " at the end.\n";
 		}
 
+		// Start at head and print each node until we fall off the end
 		void display() {
 			if (head == nullptr) {
 				cout << "The linked list is empty.\n";
@@ -73,6 +82,7 @@ class LinkedList {
 			cout << "nullptr\n";
 		}
 
+		// Insert so the new node ends up at position 'pos' (1 = first)
 		void insert_by_pos(int val, int pos){
 			if (pos < 1) {
 				cout << "Position must be 1 or greater.\n";
@@ -102,6 +112,7 @@ class LinkedList {
 			size++;
 			cout << "Added " << val << " at position " << pos << ".\n";
 		}
+		// Find the node holding 'search', then link the new node right after it
 		void insert_by_val(int val , int search){
 			Node* p = head;
 			while (p != nullptr && p->data != search) {
@@ -113,6 +124,7 @@ class LinkedList {
 				return;
 			}
 
+			// Same linking as insert_by_pos: new -> p's old next, then p -> new
 			Node* temp = new Node(val);
 			temp->next = p->next;
 			p->next = temp;
@@ -120,6 +132,7 @@ class LinkedList {
 			cout << "Added " << val << " after value " << search << ".\n";
 
 		}
+		// Move head to the second node, then free the old first node
 		void delete_first(){
 			if (head == nullptr) {
 				cout << "The linked list is already empty.\n";
@@ -138,6 +151,7 @@ class LinkedList {
 				return;
 			}
 
+			// Only one node: deleting it makes the list empty
 			if (head->next == nullptr) {
 				delete head;
 				head = nullptr;
@@ -157,6 +171,7 @@ class LinkedList {
 			cout << "Last element deleted.\n";
 		}
 
+		// Delete the node at position 'pos' (1 = first)
 		void delete_by_pos(int pos){
 			if (pos < 1 || pos > size) {
 				cout << "Position is outside the linked list.\n";
@@ -223,6 +238,7 @@ class LinkedList {
 			cout << "Linked list sorted in ascending order.\n";
 		}
 
+		// Walk forward until the NEXT node holds val; flag = 1 if we moved at least once
 		void search(int val){
 			Node *temp = head;
 			int flag = 0;
@@ -253,6 +269,7 @@ int main() {
 		 << "10. Bubble sort\n"
 		 << "0. Exit\n";
 
+	// Menu loop: each choice calls one list function, then shows the list
 	do {
 		cout << "\n---------------------------------------\n";
 		cout << "Enter your choice: ";

@@ -3,11 +3,16 @@
 
 using namespace std;
 
+// Aadhar records stored in a plain array.
+// 'count' = how many slots are filled. Records are always kept packed
+// at index 0 .. count-1, so inserting/removing in the middle needs shifting.
+// The user sees positions starting from 1, so we use (index - 1) for the array.
 int main() {
 	AadharUser records[100];
-	int count = 0;
+	int count = 0;  // number of records currently stored
 	int choice;
 
+	// Keep showing the menu until the user picks 7 (exit)
 	do {
 		cout << "\n===== Aadhar Menu =====\n";
 		cout << "1 - input aadhar person\n";
@@ -22,6 +27,7 @@ int main() {
 
 		switch (choice) {
 		case 1:
+            // Add at the end: the next free slot is records[count]
             cout << "Enter details for record " << count + 1 << ":\n";
             records[count].inputAadhar();
             count++;
@@ -36,6 +42,7 @@ int main() {
 				if (index < 1 || index > count) {
 					cout << "Invalid index.\n";
 				} else {
+					// Just overwrite the record at that position
 					cout << "Enter new details:\n";
 					records[index - 1].inputAadhar();
 				}
@@ -45,6 +52,7 @@ int main() {
             int index;
             cout << "Enter position to insert (1 to " << count + 1 << "): ";
             cin >> index;
+            // count + 1 is allowed, which means "insert at the end"
             if (index < 1 || index > count + 1) {
                 cout << "Invalid position.\n";
             } else {
@@ -88,6 +96,7 @@ int main() {
 					cout << "Enter Aadhar number to search: ";
 					cin >> searchNumber;
 
+					// Linear search: check each record one by one until a match is found
 					for (int i = 0; i < count; ++i) {
 						if (records[i].aadharNumber == searchNumber) {
 							cout << "\nRecord found at index " << i + 1 << '\n';
@@ -107,6 +116,7 @@ int main() {
 			if (count == 0) {
 				cout << "No records available.\n";
 			} else {
+				// Print every stored record
 				for (int i = 0; i < count; ++i) {
 					cout << "\nRecord " << i + 1 << '\n';
 					records[i].viewAadhar();

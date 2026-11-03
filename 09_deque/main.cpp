@@ -3,11 +3,15 @@ using namespace std;
 
 const int MAX = 5;
 
+// Deque (Double Ended Queue): we can insert and delete at BOTH ends.
+// Built on a circular array, so front/rear wrap around using % MAX.
+//   - push/pop at rear  -> rear moves forward / backward
+//   - push/pop at front -> front moves backward / forward
 class Deque {
     int arr[MAX];
-    int front;
-    int rear;
-    int count;
+    int front;  // index of the first element (-1 when empty)
+    int rear;   // index of the last element (-1 when empty)
+    int count;  // number of elements
 
 public:
     Deque() {
@@ -29,6 +33,7 @@ public:
             cout << "Deque is full. Cannot insert at front.\n";
             return;
         }
+        // First element: front and rear both point to slot 0
         if (isEmpty()) {
             front = rear = 0;
         } else {
@@ -61,6 +66,7 @@ public:
             cout << "Deque is empty. Cannot delete from front.\n";
             return;
         }
+        // We don't erase the value; moving 'front' forward is enough to remove it
         cout << arr[front] << " deleted from front.\n";
         count--;
         // Deque became empty, so reset both indices
@@ -101,6 +107,7 @@ public:
     }
 };
 
+// Menu-driven program to test all deque operations
 int main() {
     Deque dq;
     int choice, value;

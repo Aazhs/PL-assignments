@@ -2,6 +2,14 @@
 
 using namespace std;
 
+// Sparse matrix = a matrix where most values are 0.
+// Instead of storing the whole grid, we store only the non-zero values
+// as "triplets": (row, column, value). This saves a lot of space.
+//
+// Example:  0 0 5      Triplet:  3 3 2   <- header: rows, cols, non-zero count
+//           0 0 0                0 2 5
+//           7 0 0                2 0 7
+
 const int MAX_ROWS = 20;
 const int MAX_COLS = 20;
 const int MAX_NON_ZERO = 400;
@@ -10,7 +18,7 @@ class Triplet {
 public:
   // Row 0 is the header {rows, cols, non-zero count}; rows 1..n are {row, col, value}
   int triplet[MAX_NON_ZERO + 1][3];
-  int totalRows;
+  int totalRows;  // header row + one row per non-zero value
 
   Triplet();
 
@@ -25,6 +33,7 @@ public:
   Triplet multiplyTriplet(Triplet other);
 };
 
+// Start as an empty 0x0 matrix (only the header row exists)
 Triplet::Triplet() {
   totalRows = 1;
   triplet[0][0] = 0;
@@ -32,6 +41,7 @@ Triplet::Triplet() {
   triplet[0][2] = 0;
 }
 
+// Print every row of the triplet table (header first)
 void Triplet::displayTriplet() {
   cout << "Triplet matrix:\n";
   for (int i = 0; i < totalRows; i++) {
@@ -40,6 +50,8 @@ void Triplet::displayTriplet() {
   }
 }
 
+// User types the triplet directly: first the header, then each non-zero value.
+// Values should be entered in row-wise order (needed by add).
 void Triplet::inputTriplet() {
   int rowCount, colCount, nonZeroCount;
 
@@ -64,6 +76,7 @@ void Triplet::inputTriplet() {
   }
 }
 
+// User types the full matrix (with zeros), then we convert it to triplet form
 void Triplet::inputSparseAndConvert() {
   int sparse[MAX_ROWS][MAX_COLS];
   int rowCount, colCount;
@@ -90,7 +103,9 @@ void Triplet::inputSparseAndConvert() {
 
 void Triplet::sparseToTriplet(int sparse[MAX_ROWS][MAX_COLS], int rowCount,
                               int colCount) {
-  int next = 1;
+  // Scan the matrix row by row; every non-zero value becomes one triplet row.
+  // Because we scan row by row, the triplet is automatically sorted by (row, col).
+  int next = 1;  // next free row in the triplet (row 0 is the header)
   int nonZeroCount = 0;
 
   triplet[0][0] = rowCount;
@@ -113,6 +128,7 @@ void Triplet::sparseToTriplet(int sparse[MAX_ROWS][MAX_COLS], int rowCount,
   totalRows = nonZeroCount + 1;
 }
 
+// Add two sparse matrices directly in triplet form (both must be the same size)
 Triplet Triplet::addTriplet(Triplet other) {
   Triplet result;
 
@@ -124,9 +140,9 @@ Triplet Triplet::addTriplet(Triplet other) {
 
   int n1 = triplet[0][2];
   int n2 = other.triplet[0][2];
-  int i = 1;
-  int j = 1;
-  int k = 1;
+  int i = 1;  // current row in this matrix
+  int j = 1;  // current row in the other matrix
+  int k = 1;  // next free row in the result
 
   result.triplet[0][0] = triplet[0][0];
   result.triplet[0][1] = triplet[0][1];
@@ -140,12 +156,14 @@ Triplet Triplet::addTriplet(Triplet other) {
     int c2 = other.triplet[j][1];
 
     if (r1 < r2 || (r1 == r2 && c1 < c2)) {
+      // This matrix's element comes first -> copy it
       result.triplet[k][0] = triplet[i][0];
       result.triplet[k][1] = triplet[i][1];
       result.triplet[k][2] = triplet[i][2];
       i++;
       k++;
     } else if (r2 < r1 || (r1 == r2 && c2 < c1)) {
+      // Other matrix's element comes first -> copy it
       result.triplet[k][0] = other.triplet[j][0];
       result.triplet[k][1] = other.triplet[j][1];
       result.triplet[k][2] = other.triplet[j][2];
@@ -182,17 +200,21 @@ Triplet Triplet::addTriplet(Triplet other) {
     k++;
   }
 
+  // k - 1 rows were filled, so that is the non-zero count of the result
   result.triplet[0][2] = k - 1;
   result.totalRows = k;
   return result;
 }
 
+// Transpose = swap rows and columns: element (r, c) moves to (c, r).
+// Simple method: O(cols * nonZero), because we scan the whole list once per column.
 Triplet Triplet::transposeSimple() {
   Triplet result;
   int rowCount = triplet[0][0];
   int colCount = triplet[0][1];
   int nonZeroCount = triplet[0][2];
 
+  // Result header: rows and cols are swapped
   result.triplet[0][0] = colCount;
   result.triplet[0][1] = rowCount;
   result.triplet[0][2] = nonZeroCount;
@@ -215,6 +237,10 @@ Triplet Triplet::transposeSimple() {
   return result;
 }
 
+// Fast transpose: O(cols + nonZero).
+// Idea: first count how many elements each column has. From that we know
+// exactly where each column's elements must start in the result, so every
+// element can be placed directly in its final slot in a single pass.
 Triplet Triplet::transposeFast() {
   Triplet result;
   int rowCount = triplet[0][0];
@@ -256,6 +282,8 @@ Triplet Triplet::transposeFast() {
   return result;
 }
 
+// Multiply A (this) x B (other). Rule: A's columns must equal B's rows.
+// Formula: C[i][j] = sum over k of A[i][k] * B[k][j]
 Triplet Triplet::multiplyTriplet(Triplet other) {
   Triplet result;
 
@@ -286,8 +314,10 @@ Triplet Triplet::multiplyTriplet(Triplet other) {
 #include <limits>
 
 int main() {
+  // firstMatrix is the main matrix; add/multiply ask for a second one
   Triplet firstMatrix;
 
+  // Menu loop: runs until the user chooses 8
   while (true) {
     int choice;
     cout << "\n1.Input Triplet\n";

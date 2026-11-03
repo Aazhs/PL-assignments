@@ -5,6 +5,14 @@
 
 using namespace std;
 
+// Pizza parlor order queue built on a CIRCULAR linked list.
+// Circular = the last node's next points back to the first node.
+//   tail -> [last] -> [first] -> [second] -> ... -> [last]
+// Queue rule (FIFO): new orders join at the back, orders are served from the front.
+// With only a tail pointer we get both ends in O(1):
+//   back  = tail,   front = tail->next
+
+// One pizza order
  class Node {
  public:
 	 string type;
@@ -18,8 +26,8 @@ using namespace std;
  public:
 	 // Only tail is kept: tail->next is the front of the queue, because the list is circular
 	 Node* tail;
-	 int capacity;
-	 int size;
+	 int capacity;  // max orders allowed (M)
+	 int size;      // orders currently waiting
 
 	 explicit Queue(int maxOrders);
 	 ~Queue();
@@ -57,6 +65,7 @@ using namespace std;
 	 return size == 0;
  }
 
+ // Place a new order at the back of the queue
  void Queue::add() {
 	 if (isFull()) {
 		 cout << "The parlor is full. Maximum orders: " << capacity << ".\n";
@@ -101,6 +110,7 @@ using namespace std;
 		  << " orders).\n";
  }
 
+ // Serve (remove) the order at the front of the queue
  void Queue::serve(bool showMessage) {
 	 if (isEmpty()) {
 		 cout << "No pizza is waiting to be served.\n";
@@ -129,6 +139,7 @@ using namespace std;
 	 delete n;
  }
 
+ // Print all waiting orders from front to back
  void Queue::show() {
 	 if (isEmpty()) {
 		 cout << "No pizzas are waiting.\n";
@@ -149,6 +160,7 @@ using namespace std;
 
  int main() {
 	 int maxOrders;
+	 // Keep asking until the user enters a valid positive number
 	 cout << "Enter the maximum number of orders (M): ";
 	 while (!(cin >> maxOrders) || maxOrders <= 0) {
 		 cin.clear();

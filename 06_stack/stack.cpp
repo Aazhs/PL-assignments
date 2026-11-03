@@ -3,6 +3,9 @@ using namespace std;
 
 const int MAX_SIZE = 100;
 
+// Stack using an array. LIFO = Last In, First Out
+// (like a pile of plates: you add and remove only from the top).
+// Used by main.cpp to convert between infix, postfix and prefix.
 class Stack
 {
 private:
@@ -11,6 +14,7 @@ private:
     int top = -1;
 
 public:
+    // Add a value on top (ignored if the stack is full)
     void push(const string &value)
     {
         if (top < MAX_SIZE - 1)
@@ -20,6 +24,7 @@ public:
         }
     }
 
+    // Remove and return the top value ("" if empty)
     string pop()
     {
         if (top == -1)
@@ -31,6 +36,7 @@ public:
         return items[top--];
     }
 
+    // Look at the top value without removing it
     string peek() const
     {
         if (top == -1)
@@ -47,6 +53,7 @@ public:
     }
 };
 
+// Example test input / output for infix to postfix:
 // A + B * C + ( D / E ) ^ F -> ABC*+DE/F^+
 
 //

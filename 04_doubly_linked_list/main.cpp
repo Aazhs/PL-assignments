@@ -1,6 +1,12 @@
 #include <iostream>
 using namespace std;
 
+// Doubly linked list: each node has a pointer to the NEXT node and to the
+// PREVIOUS node, so we can move both forward and backward.
+//   nullptr <- [10] <-> [20] <-> [30] -> nullptr
+// Rule to remember: whenever we link two nodes, set BOTH next and prev.
+
+// One node: value + link forward (next) + link backward (prev)
 class Node{
 public:
     Node *next;
@@ -16,12 +22,13 @@ public:
 
 class Dll{
 public:
-    Node *head;
+    Node *head;  // first node; nullptr means empty
 
     Dll(){
         head = nullptr;
     }
 
+    // Read one value and add it at the end of the list
     void create(){
         cout<<"Enter value to add:- ";
         int val;cin>>val;
@@ -43,6 +50,7 @@ public:
         }
     }
 
+    // Read n values and add each one at the end (same logic as create())
     void createNValues(int n){
         cout << "Enter " << n << " values: ";
         for(int i = 0; i < n; i++){
@@ -67,6 +75,7 @@ public:
         }
     }
 
+    // Forward print: start at head and follow next
     void display(){
         Node* temp = head;
         while(temp != nullptr){
@@ -76,6 +85,7 @@ public:
         cout<<"NULL\n";
     }
 
+    // Reverse print: this is possible only because each node has a prev pointer
     void display_rev(){
         Node* p = head;
         // Go to the last node first, then walk backwards using prev
@@ -91,6 +101,7 @@ public:
         cout<<"NULL\n";
     }
 
+    // Count nodes by walking from head to the end
     int getSize(){
         int size = 0;
         Node* temp = head;
@@ -159,6 +170,7 @@ public:
 
         while(p != nullptr && q != nullptr){
             Node *selected;
+            // Pick the smaller front node from the two lists
             if(p->data <= q->data){
                 selected = p;
                 p = p->next;
@@ -168,6 +180,7 @@ public:
                 q = q->next;
             }
 
+            // Attach the selected node after r (or make it head if the merged list is empty)
             selected->prev = r;
 
             if(r == nullptr){
@@ -196,6 +209,7 @@ public:
             remaining = remaining->next;
         }
 
+        // Last node of the merged list must end the chain
         if(r != nullptr){
             r->next = nullptr;
         }
@@ -207,6 +221,8 @@ public:
 
 };
 
+// Menu: build two lists, show/sort them, and merge them.
+// Tip: sort both lists before merging, because merge expects sorted input.
 int main(){
     Dll list1, list2, mergedList;
     int choice;

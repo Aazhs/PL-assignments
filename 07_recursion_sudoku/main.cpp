@@ -3,9 +3,14 @@ using namespace std;
 
 // 4x4 sudoku: digits 1 to 4, each row, column and 2x2 box has every digit once.
 // Empty cells are 0.
+// Method: recursion + backtracking. Fill cells one by one; if we get stuck,
+// go back to the previous cell and try a different digit.
 const int N = 4;
 
+// Can 'num' be placed at (row, col)? Only if it is not already in
+// the same row, the same column, or the same 2x2 box.
 bool isSafe(int grid[N][N], int row, int col, int num) {
+    // grid[row][i] checks the row, grid[i][col] checks the column
     for (int i = 0; i < N; i++) {
         if (grid[row][i] == num || grid[i][col] == num) {
             return false;
@@ -26,6 +31,8 @@ bool isSafe(int grid[N][N], int row, int col, int num) {
 }
 
 
+// Try to fill the grid starting from cell (row, col), moving left to right,
+// top to bottom. Returns true if the whole grid could be filled.
 bool solve(int grid[N][N], int row, int col) {
 
     // Went past the last row, so every cell has been filled
@@ -66,6 +73,7 @@ int main() {
         }
     }
 
+    // Start solving from the top-left cell
     if (solve(grid, 0, 0)) {
         cout << "\nSolution:\n";
         for (int i = 0; i < N; i++) {
