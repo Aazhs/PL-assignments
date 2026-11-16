@@ -2,90 +2,125 @@
 #include <cmath>
 using namespace std;
 
-// How this program works:
-// Example: (2x^2 + 3) + (5x^2 + x) = 7x^2 + x + 3.
-// Each node stores just one term; next points to the following term.
-// Insert terms from both inputs into the result, combining matching powers.
-
-// One linked-list node stores one coefficient and exponent.
-class Node{
-public:
+// One term, such as 5x^2, stores coefficient 5 and exponent 2.
+struct Node
+{
     double coefficient;
     int exponent;
     Node* next;
-    Node(double c, int e): coefficient(c), exponent(e), next(nullptr){}
 };
-class Polynomial{
-    Node* head = nullptr;
-public:
-    ~Polynomial(){
-        while(head){ Node* temp = head;
-            head = head->next;
-            delete temp; }
-    }
-    void insert(double c, int e){
-        if(c == 0) return;
-        // Walk with two ordinary pointers: current and the node before it.
-        // Stop where the new exponent belongs in descending order.
-        Node* current = head;
-        Node* previous = nullptr;
-        while(current != nullptr && current->exponent > e){
-            previous = current;
-            current = current->next;
-        }
 
-        if(current != nullptr && current->exponent == e){
-            // Same power: add coefficients, e.g. 2x^3 + 5x^3 = 7x^3.
-            current->coefficient += c;
-            if(current->coefficient == 0){
-                // Opposite terms cancel. Remove the node from the chain.
-                if(previous == nullptr) head = current->next;
-                else previous->next = current->next;
-                delete current;
+void insert(Node*& head, double coefficient, int exponent)
+{
+    // head is passed by reference because inserting first may change it.
+    Node* current = head;
+    Node* previous = nullptr;
+
+    // Keep terms in descending order of exponent.
+    while (current != nullptr && current->exponent > exponent)
+    {
+        previous = current;
+        current = current->next;
+    }
+
+    if (current != nullptr && current->exponent == exponent)
+    {
+        // Same power: add the coefficients instead of making another node.
+        current->coefficient += coefficient;
+    }
+    else
+    {
+        Node* temp = new Node{coefficient, exponent, current};
+        if (previous == nullptr) head = temp;
+        else previous->next = temp;
+    }
+}
+
+bool input(Node*& head)
+{
+    int n, exponent;
+    double coefficient;
+    cout << "Enter number of terms: ";
+    if (!(cin >> n) || n < 0) return false;
+    cout << "Enter coefficient and exponent for each term:\n";
+    for (int i = 0; i < n; i++)
+    {
+        if (!(cin >> coefficient >> exponent) || exponent < 0) return false;
+        insert(head, coefficient, exponent);
+    }
+    return true;
+}
+
+void add(Node* first, Node* second, Node*& result)
+{
+    // Insert every term into the result; insert() combines equal powers.
+    while (first != nullptr)
+    {
+        insert(result, first->coefficient, first->exponent);
+        first = first->next;
+    }
+    while (second != nullptr)
+    {
+        insert(result, second->coefficient, second->exponent);
+        second = second->next;
+    }
+}
+
+void display(Node* head)
+{
+    bool first = true;
+    while (head != nullptr)
+    {
+        // Terms that cancel to zero should not appear in the answer.
+        if (head->coefficient != 0)
+        {
+            if (!first)
+            {
+                if (head->coefficient < 0) cout << " - ";
+                else cout << " + ";
             }
+            else if (head->coefficient < 0) cout << "-";
+            cout << abs(head->coefficient);
+            if (head->exponent != 0) cout << "x^" << head->exponent;
+            first = false;
         }
-        else{
-            // Different power: place a new node between previous and current.
-            Node* temp = new Node(c, e);
-            temp->next = current;
-            if(previous == nullptr) head = temp;
-            else previous->next = temp;
-        }
+        head = head->next;
     }
+    if (first) cout << "0";
+    cout << endl;
+}
 
-    bool input(){
-        int n, e; double c;
-        cout << "Enter number of terms: ";
-        if(!(cin >> n) || n < 0) return false;
-        cout << "Enter coefficient and exponent for each term:\n";
-        for(int i = 0; i < n; i++){
-            if(!(cin >> c >> e) || e < 0) return false;
-            insert(c, e);
-        }
-        return true;
+void clear(Node* head)
+{
+    // Save the next address before deleting the current node.
+    while (head != nullptr)
+    {
+        Node* temp = head;
+        head = head->next;
+        delete temp;
     }
-    void add(Polynomial& other, Polynomial& result){
-        for(Node* p = head; p; p = p->next) result.insert(p->coefficient, p->exponent);
-        for(Node* p = other.head; p; p = p->next) result.insert(p->coefficient, p->exponent);
-    }
-    void display(){
-        if(!head) cout << "0";
-        for(Node* p = head; p; p = p->next){
-            if(p != head) cout << (p->coefficient < 0 ? " - " : " + ");
-            else if(p->coefficient < 0) cout << "-";
-            cout << abs(p->coefficient);
-            if(p->exponent != 0) cout << "x^" << p->exponent;
-        }
-        cout << "\n";
-    }
-};
-// Program starts here: read inputs, then perform the requested operations.
-int main(){
-    Polynomial a, b, result;
+}
+
+int main()
+{
+    Node* first = nullptr;
+    Node* second = nullptr;
+    Node* result = nullptr;
     cout << "First polynomial:\n";
-    if(!a.input()) return 0;
-    cout << "Second polynomial:\n";
-    if(!b.input()) return 0;
-    a.add(b, result);
-    cout << "Sum: "; result.display();
+    bool valid = input(first);
+    if (valid)
+    {
+        cout << "Second polynomial:\n";
+        valid = input(second);
+    }
+    if (valid)
+    {
+        add(first, second, result);
+        cout << "Sum: ";
+        display(result);
+    }
+    clear(first);
+    clear(second);
+    clear(result);
+    return 0;
 }

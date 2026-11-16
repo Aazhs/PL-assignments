@@ -1,10 +1,9 @@
 # Practice Problems (1-14)
 
-Standalone C++ programs following the existing assignments' console-based format,
-with simple classes/functions and step-by-step comments explaining the algorithms.
-Rotation uses repeated shifts, polynomial insertion uses ordinary previous/current
-pointers, and scheduling uses a plain array ready queue. These choices favour
-ease of understanding over maximum efficiency.
+Standalone C++ programs using plain functions, arrays and simple structs,
+with braces on separate lines and step-by-step comments. Most programs read
+input once and print the result, like the supplied array-rotation example.
+Only railway reservation keeps a menu for repeated bookings and cancellations.
 Compile and run each file separately (each has its own `main`):
 
 ```sh
@@ -17,7 +16,7 @@ c++ -std=c++11 -Wall -Wextra -pedantic 01_array_rotation.cpp -o /tmp/practice
 | 1 | `01_array_rotation.cpp` | Left/right rotation by k |
 | 2 | `02_matrix_operations.cpp` | 2-D array addition and multiplication |
 | 3 | `03_polynomial_addition.cpp` | Linked-list polynomial addition |
-| 4 | `04_alternate_doubly_linked_list.cpp` | Alternate merge, sort and reverse display |
+| 4 | `04_alternate_doubly_linked_list.cpp` | Alternate merge and sort |
 | 5 | `05_railway_reservation.cpp` | Circular linked list, reserve/cancel/display |
 | 6 | `06_eight_queens_stack.cpp` | Iterative stack backtracking, all 92 solutions counted |
 | 7 | `07_tower_of_hanoi.cpp` | Recursive disk moves |
@@ -31,21 +30,26 @@ c++ -std=c++11 -Wall -Wextra -pedantic 01_array_rotation.cpp -o /tmp/practice
 
 ## Conventions
 
-- Rotation changes the current array. Negative k reverses direction.
+- Rotation prints left and right rotations of the original array. Use k >= 0.
 - Polynomials accept non-negative exponents and combine repeated powers.
 - Alternate merging consumes both input lists and appends any leftover nodes.
 - Railway reservation models one train with 10 seats and unique reservation IDs.
 - Hospital priorities: 1 emergency, 2 urgent, 3 routine. Equal priorities use FIFO.
-- Scheduling ties use arrival time, then process input order. Output includes
+  Read appointments, display their order, serve one patient, then show the rest.
+- Scheduling prints both FCFS and SJF for the same input.
+  Scheduling ties use arrival time, then process input order. Output includes
   start/finish, waiting/turnaround times, and averages.
+- Phone book reads the initial friends, shows sorted names, then searches once
+  and inserts the missing friend if space is available.
 - Palindrome checks and alphabetical name ordering are case-sensitive; spaces
-  are significant. An empty string is a palindrome.
+  are significant. An empty string is a palindrome; maximum length is 100.
 - Problem 13 mixes the terms "separate chaining" and "with replacement".
   This uses linked collision chains sharing the 12 slots (coalesced chaining),
   relocating foreign occupants so each chain starts at its home address.
 - Problem 14 says "linear probing without changing with replacement" in the
   supplied PDF. Both with-replacement and without-replacement modes are provided
-  so either interpretation can be practised. Choose the mode before inserting.
+  so either interpretation can be practised. Choose the mode, enter up to nine
+  records, view the table, then search for one medicine key.
 - Programs expect the prompted input types; failed input ends the program.
   Array sizes and relevant ranges are checked. Use values whose arithmetic fits
   the declared numeric types.

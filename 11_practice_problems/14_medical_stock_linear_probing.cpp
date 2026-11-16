@@ -2,101 +2,98 @@
 #include <string>
 using namespace std;
 
-// How this program works:
-// Home address = medicine key % 9; collisions try the next slot.
-// After slot 8, probing wraps around to slot 0.
-// Without replacement: leave old records where they are.
-// With replacement: move a foreign occupant and put the new key at home.
-
-struct Medicine{
-    int key = 0, quantity = 0;
+struct Medicine
+{
+    int key, quantity;
     string name;
-    bool occupied = false;
 };
-// Nine slots; hash(key) = key mod 9. Both replacement variants are available.
-class HashTable{
-    Medicine table[9];
-    bool replacement;
-    int hash(int key){ return (key % 9 + 9) % 9; }
-public:
-    HashTable(bool mode): replacement(mode){}
-    int search(int key){
-        // Calculate the bucket where this key belongs.
-        int home = hash(key);
-        for(int step = 0; step < 9; step++){
-            int i = (home + step) % 9;
-            // No deletion is offered, so an empty slot ends this key's probe path.
-            if(!table[i].occupied) return -1;
-            if(table[i].key == key) return i;
-        }
-        return -1;
+
+int search(Medicine table[], bool occupied[], int key)
+{
+    int home = key % 9;
+    for (int step = 0; step < 9; step++)
+    {
+        int index = (home + step) % 9;
+        if (!occupied[index]) return -1; // An empty slot ends the search.
+        if (table[index].key == key) return index;
     }
-    void insert(Medicine item){
-        // Reusing a medicine key updates stock instead of creating a duplicate.
-        int existing = search(item.key);
-        if(existing != -1){ table[existing] = item; cout << "Stock updated.\n"; return; }
-        int home = hash(item.key), free = -1;
-        for(int step = 0; step < 9; step++){
-            int i = (home + step) % 9;
-            if(!table[i].occupied){ free = i; break; }
-        }
-        if(free == -1){ cout << "Hash table full.\n"; return; }
-        // With replacement: put a new home key in its home slot and move the
-        // foreign occupant to the first free slot along the probe sequence.
-        if(replacement && table[home].occupied && hash(table[home].key) != home){
-            table[free] = table[home];
-            table[home] = item;
-        }
-        else table[free] = item;
-        cout << "Stock stored.\n";
+    return -1;
+}
+
+void insert(Medicine table[], bool occupied[], Medicine item, bool replacement)
+{
+    int existing = search(table, occupied, item.key);
+    if (existing != -1)
+    {
+        table[existing] = item; // Same key: update the medicine's stock.
+        return;
     }
-    void show(int index){
-        cout << index << "\t" << table[index].key << "\t" << table[index].name
-             << "\t" << table[index].quantity << "\n";
-    }
-    void find(int key){
-        int index = search(key);
-        if(index == -1) cout << "Medicine not found.\n";
-        else show(index);
-    }
-    void display(){
-        cout << "Index\tKey\tMedicine\tQuantity\n";
-        for(int i = 0; i < 9; i++){
-            if(table[i].occupied) show(i);
-            else cout << i << "\tEMPTY\n";
+
+    int home = item.key % 9;
+    int empty = -1;
+    for (int step = 0; step < 9; step++)
+    {
+        int index = (home + step) % 9;
+        if (!occupied[index])
+        {
+            empty = index;
+            break;
         }
     }
-};
-// Program starts here: read inputs, then perform the requested operations.
-int main(){
-    int mode;
-    cout << "Probing mode: 1. Without replacement  2. With replacement\nEnter mode: ";
-    if(!(cin >> mode) || (mode != 1 && mode != 2)) return 0;
-    HashTable stock(mode == 2);
-    int choice, key;
-    // Repeat the menu until Exit is chosen or the input ends.
-    while(true){
-        cout << "\n===== Medical Stock Menu =====\n1. Insert / update\n2. Search\n3. Display\n4. Exit\nEnter choice: ";
-        if(!(cin >> choice) || choice == 4) break;
-        switch(choice){
-            case 1: {
-                Medicine item;
-                cout << "Enter non-negative medicine key: ";
-                if(!(cin >> item.key)) return 0;
-                if(item.key < 0){ cout << "Invalid key.\n"; break; }
-                cout << "Enter medicine name: ";
-                if(!getline(cin >> ws, item.name)) return 0;
-                cout << "Enter stock quantity: ";
-                if(!(cin >> item.quantity)) return 0;
-                if(item.quantity < 0){ cout << "Invalid quantity.\n"; break; }
-                item.occupied = true;
-                stock.insert(item); break;
-            }
-            case 2:
-                cout << "Enter medicine key: "; if(!(cin >> key)) return 0;
-                stock.find(key); break;
-            case 3: stock.display(); break;
-            default: cout << "Invalid choice.\n";
-        }
+    if (empty == -1)
+    {
+        cout << "Hash table full.\n";
+        return;
     }
+
+    // With replacement: move a foreign occupant out of the new key's home.
+    // Without replacement: simply use the first empty slot found above.
+    if (replacement && occupied[home] && table[home].key % 9 != home)
+    {
+        table[empty] = table[home];
+        table[home] = item;
+    }
+    else table[empty] = item;
+    occupied[empty] = true;
+}
+
+void display(Medicine table[], bool occupied[])
+{
+    cout << "Index\tKey\tMedicine\tQuantity\n";
+    for (int i = 0; i < 9; i++)
+    {
+        cout << i << "\t";
+        if (!occupied[i]) cout << "EMPTY\n";
+        else cout << table[i].key << "\t" << table[i].name << "\t" << table[i].quantity << endl;
+    }
+}
+
+int main()
+{
+    Medicine table[9], item;
+    bool occupied[9] = {}; // All slots start empty.
+    int mode, n;
+    // The PDF's wording is unclear, so either probing variant can be selected.
+    cout << "1. Without replacement  2. With replacement\nEnter mode: ";
+    if (!(cin >> mode) || (mode != 1 && mode != 2)) return 0;
+    cout << "Enter number of medicine records (0 to 9): ";
+    if (!(cin >> n) || n < 0 || n > 9) return 0;
+    for (int i = 0; i < n; i++)
+    {
+        cout << "Enter non-negative medicine key: ";
+        if (!(cin >> item.key) || item.key < 0) return 0;
+        cout << "Enter medicine name: ";
+        if (!getline(cin >> ws, item.name)) return 0;
+        cout << "Enter quantity: ";
+        if (!(cin >> item.quantity) || item.quantity < 0) return 0;
+        insert(table, occupied, item, mode == 2);
+    }
+    display(table, occupied);
+    int key;
+    cout << "Enter medicine key to search: ";
+    if (!(cin >> key) || key < 0) return 0;
+    int index = search(table, occupied, key);
+    if (index == -1) cout << "Medicine not found.\n";
+    else cout << table[index].name << "\tQuantity: " << table[index].quantity << endl;
+    return 0;
 }

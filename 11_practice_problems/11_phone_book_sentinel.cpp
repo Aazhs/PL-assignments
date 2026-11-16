@@ -2,61 +2,75 @@
 #include <string>
 using namespace std;
 
-// How this program works:
-// Keep friend records in alphabetical order by name.
-// Sentinel search places the wanted name in one extra slot at the end.
-// The search always stops; stopping at the extra slot means not found.
-// If missing, shift larger names right and insert the new friend.
+struct Friend
+{
+    string name, mobile; // A string keeps leading zeros in phone numbers.
+};
 
-struct Friend{
-    string name, mobile; // String preserves leading zeros and country codes.
-};
-class PhoneBook{
-    Friend records[101]; // 100 records plus one reserved sentinel slot.
-    int count = 0;
-public:
-    int search(string name){
-        // This extra entry is temporary; it is not a real friend record.
-        records[count].name = name;
-        int i = 0;
-        // Sentinel guarantees a match, so the loop needs no boundary check.
-        while(records[i].name != name) i++;
-        // An index below count is a real match; count itself is the sentinel.
-        if(i < count) return i;
-        return -1;
+int sentinelSearch(Friend book[], int count, string name)
+{
+    // The extra slot guarantees a match, so no boundary check is needed inside.
+    book[count].name = name;
+    int i = 0;
+    while (book[i].name != name) i++;
+    if (i < count) return i; // A real record matched.
+    return -1; // Only the sentinel matched: friend is missing.
+}
+
+void insert(Friend book[], int& count, Friend person)
+{
+    int i = count - 1;
+    // Make space by moving alphabetically larger names one place right.
+    while (i >= 0 && book[i].name > person.name)
+    {
+        book[i + 1] = book[i];
+        i--;
     }
-    void findOrInsert(string name){
-        int index = search(name);
-        if(index != -1){ cout << records[index].name << ": " << records[index].mobile << "\n"; return; }
-        if(count == 100){ cout << "Phone book full.\n"; return; }
-        string mobile;
-        cout << "Friend not present. Enter mobile number to insert: ";
-        if(!(cin >> mobile)) return;
-        int i = count - 1;
-        // Insert directly in alphabetical (case-sensitive) order.
-        while(i >= 0 && records[i].name > name){ records[i + 1] = records[i]; i--; }
-        records[i + 1] = {name, mobile}; count++;
-        cout << "Friend inserted.\n";
+    book[i + 1] = person;
+    count++;
+}
+
+void display(Friend book[], int count)
+{
+    for (int i = 0; i < count; i++)
+        cout << book[i].name << "\t" << book[i].mobile << endl;
+}
+
+int main()
+{
+    Friend book[101], person; // 100 friends and one sentinel slot.
+    int n, count = 0;
+    cout << "Enter number of friends (0 to 100): ";
+    if (!(cin >> n) || n < 0 || n > 100) return 0;
+    for (int i = 0; i < n; i++)
+    {
+        cout << "Enter name: ";
+        if (!getline(cin >> ws, person.name)) return 0;
+        cout << "Enter mobile number: ";
+        if (!(cin >> person.mobile)) return 0;
+        if (sentinelSearch(book, count, person.name) == -1)
+            insert(book, count, person);
+        else cout << "Name already present.\n";
     }
-    void display(){
-        if(count == 0) cout << "Phone book empty.\n";
-        for(int i = 0; i < count; i++) cout << records[i].name << "\t" << records[i].mobile << "\n";
+    cout << "Sorted phone book:\n";
+    display(book, count);
+
+    cout << "Enter friend name to search: ";
+    string name;
+    if (!getline(cin >> ws, name)) return 0;
+    int index = sentinelSearch(book, count, name);
+    if (index != -1)
+        cout << book[index].name << ": " << book[index].mobile << endl;
+    else if (count == 100)
+        cout << "Friend not found; phone book full.\n";
+    else
+    {
+        person.name = name;
+        cout << "Friend not found. Enter mobile number to insert: ";
+        if (!(cin >> person.mobile)) return 0;
+        insert(book, count, person);
+        cout << "Updated phone book:\n";
+        display(book, count);
     }
-};
-// Program starts here: read inputs, then perform the requested operations.
-int main(){
-    PhoneBook book; int choice; string name;
-    // Repeat the menu until Exit is chosen or the input ends.
-    while(true){
-        cout << "\n===== Phone Book Menu =====\n1. Search / insert friend\n2. Display sorted phone book\n3. Exit\nEnter choice: ";
-        if(!(cin >> choice) || choice == 3) break;
-        switch(choice){
-            case 1:
-                cout << "Enter full name: ";
-                if(!getline(cin >> ws, name)) return 0;
-                book.findOrInsert(name); break;
-            case 2: book.display(); break;
-            default: cout << "Invalid choice.\n";
-        }
-    }
+    return 0;
 }

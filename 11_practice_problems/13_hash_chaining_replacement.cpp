@@ -1,75 +1,99 @@
 #include <iostream>
 using namespace std;
 
-// How this program works:
-// Home address = score % 12; for example 16 belongs to bucket 4.
-// Scores with the same home address are joined by next pointers.
-// If another chain occupies a new key's home, move that node to a free slot.
-// Example: 16 can occupy slot 6, but inserting 6 later moves 16 elsewhere.
-
-class Node{
-public:
+struct Node
+{
     int key, slot;
     Node* next;
-    Node(int value, int index): key(value), slot(index), next(nullptr){}
 };
-// Linked collision chains share 12 table slots (coalesced chaining).
-// Replacement ensures that each chain starts at its own home address.
-class HashTable{
-    Node* table[12] = {};
-    int hash(int key){ return (key % 12 + 12) % 12; }
-    int freeSlot(int home){
-        for(int step = 1; step < 12; step++){
-            int index = (home + step) % 12;
-            if(!table[index]) return index;
-        }
-        return -1;
+
+int freeSlot(Node* table[], int home)
+{
+    // Start after home, wrap at slot 12, and stop at the first empty slot.
+    for (int step = 1; step < 12; step++)
+    {
+        int index = (home + step) % 12;
+        if (table[index] == nullptr) return index;
     }
-public:
-    ~HashTable(){ for(int i = 0; i < 12; i++) delete table[i]; }
-    void insert(int key){
-        // Calculate the bucket where this key belongs.
-        int home = hash(key);
-        if(!table[home]){ table[home] = new Node(key, home); return; }
-        // Look for an empty slot before changing the table.
-        int free = freeSlot(home);
-        if(free == -1){ cout << "Hash table full.\n"; return; }
-        if(hash(table[home]->key) != home){
-            // A foreign-chain node occupies this home: relocate that same node.
-            // Incoming next pointers remain valid because the Node address stays the same.
-            table[free] = table[home];
-            table[free]->slot = free;
-            table[home] = new Node(key, home);
-        }
-        else{
-            Node* p = table[home];
-            while(p->next) p = p->next;
-            table[free] = new Node(key, free);
-            p->next = table[free];
+    return -1;
+}
+
+void insert(Node* table[], int key)
+{
+    int home = key % 12;
+    if (table[home] == nullptr)
+    {
+        table[home] = new Node{key, home, nullptr};
+        return;
+    }
+
+    int empty = freeSlot(table, home);
+    if (empty == -1)
+    {
+        cout << "Hash table full.\n";
+        return;
+    }
+
+    if (table[home]->key % 12 != home)
+    {
+        // A key from another chain occupies this slot. Move its node.
+        // Example: 16 may be in slot 6, but key 6 needs that home slot.
+        table[empty] = table[home];
+        table[empty]->slot = empty;
+        table[home] = new Node{key, home, nullptr};
+        // Other nodes still point to the same relocated Node object.
+    }
+    else
+    {
+        // Same home: add the new node at the end of this collision chain.
+        Node* p = table[home];
+        while (p->next != nullptr) p = p->next;
+        table[empty] = new Node{key, empty, nullptr};
+        p->next = table[empty];
+    }
+}
+
+void display(Node* table[])
+{
+    cout << "Index\tScore\tNext index\n";
+    for (int i = 0; i < 12; i++)
+    {
+        cout << i << "\t";
+        if (table[i] == nullptr) cout << "EMPTY\n";
+        else
+        {
+            cout << table[i]->key << "\t";
+            if (table[i]->next == nullptr) cout << -1;
+            else cout << table[i]->next->slot;
+            cout << endl;
         }
     }
-    void display(){
-        cout << "Index\tScore\tNext index\n";
-        for(int i = 0; i < 12; i++){
-            cout << i << "\t";
-            if(!table[i]) cout << "EMPTY\n";
-            else cout << table[i]->key << "\t" << (table[i]->next ? table[i]->next->slot : -1) << "\n";
-        }
-        cout << "Collision chains:\n";
-        for(int i = 0; i < 12; i++){
-            if(table[i] && hash(table[i]->key) == i){
-                cout << i << ": ";
-                for(Node* p = table[i]; p; p = p->next) cout << p->key << " -> ";
-                cout << "NULL\n";
+    cout << "Collision chains:\n";
+    for (int i = 0; i < 12; i++)
+    {
+        // Print only from a chain's home, not from its overflow nodes.
+        if (table[i] != nullptr && table[i]->key % 12 == i)
+        {
+            cout << i << ": ";
+            Node* p = table[i];
+            while (p != nullptr)
+            {
+                cout << p->key << " -> ";
+                p = p->next;
             }
+            cout << "NULL\n";
         }
     }
-};
-// Program starts here: run the algorithm and display its result.
-int main(){
-    HashTable scores;
-    int data[12] = {10, 5, 4, 14, 15, 20, 1, 11, 6, 16, 36, 28};
-    // Insert in the exact order given in the question.
-    for(int key : data) scores.insert(key);
-    scores.display();
+}
+
+int main()
+{
+    Node* table[12] = {};
+    int scores[12] = {10, 5, 4, 14, 15, 20, 1, 11, 6, 16, 36, 28};
+    // Insert the given scores in their original order.
+    for (int i = 0; i < 12; i++) insert(table, scores[i]);
+    display(table);
+    // Every table slot owns one node, so delete each node once.
+    for (int i = 0; i < 12; i++) delete table[i];
+    return 0;
 }

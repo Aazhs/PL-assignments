@@ -2,58 +2,76 @@
 #include <cstdlib>
 using namespace std;
 
-// How this program works:
-// Place one queen per row. Two queens cannot share a column or diagonal.
-// Push a safe column onto the stack to move to the next row.
-// If no column works, pop the previous queen and try her next column.
-// This is backtracking using a stack, without recursive calls.
+// An array is the stack: index = row, value = queen's column.
+// top is the last occupied row; -1 means the stack is empty.
+void push(int stack[], int& top, int column)
+{
+    top++;
+    stack[top] = column;
+}
 
-// Stack index = row, stored value = the column occupied by that queen.
-class Stack{
-public:
-    int column[8], top = -1;
-    void push(int col){ column[++top] = col; }
-    void pop(){ top--; }
-    bool safe(int col){
-        int row = top + 1; // We are testing a queen in the next empty row.
-        // Equal column means a vertical attack. Equal distances mean a diagonal attack.
-        for(int i = 0; i <= top; i++){
-            if(column[i] == col || abs(column[i] - col) == row - i) return false;
-        }
-        return true;
+void pop(int& top)
+{
+    top--;
+}
+
+bool safe(int stack[], int top, int column)
+{
+    int row = top + 1;
+    for (int i = 0; i <= top; i++)
+    {
+        if (stack[i] == column) return false; // Same column.
+        // On a diagonal, the row distance equals the column distance.
+        if (abs(stack[i] - column) == row - i) return false;
     }
-};
-// Program starts here: run the algorithm and display its result.
-int main(){
-    Stack queens;
-    int col = 0, solutions = 0;
-    // Iterative backtracking: pop to retry the previous row when stuck.
-    while(true){
-        while(col < 8 && !queens.safe(col)) col++;
-        if(col < 8){
-            // A safe position is found. Start the next row from column 0.
-            queens.push(col);
-            col = 0;
-            if(queens.top == 7){
-                solutions++;
-                if(solutions == 1){
+    return true;
+}
+
+void display(int stack[])
+{
+    for (int row = 0; row < 8; row++)
+    {
+        for (int column = 0; column < 8; column++)
+        {
+            if (stack[row] == column) cout << "Q ";
+            else cout << ". ";
+        }
+        cout << endl;
+    }
+}
+
+int main()
+{
+    int stack[8], top = -1, column = 0, solutions = 0;
+    while (true)
+    {
+        // Try columns from left to right in the next empty row.
+        while (column < 8 && !safe(stack, top, column)) column++;
+        if (column < 8)
+        {
+            push(stack, top, column);
+            column = 0; // Start the next row at its first column.
+            if (top == 7)
+            {
+                solutions++; // All eight queens have been placed safely.
+                if (solutions == 1)
+                {
                     cout << "First solution:\n";
-                    for(int row = 0; row < 8; row++){
-                        for(int c = 0; c < 8; c++) cout << (queens.column[row] == c ? "Q " : ". ");
-                        cout << "\n";
-                    }
+                    display(stack);
                 }
-                // Retry the previous row at the column after its old queen.
-                col = queens.column[queens.top] + 1;
-                queens.pop();
+                // Remove the last queen and look for another solution.
+                column = stack[top] + 1;
+                pop(top);
             }
         }
-        else{
-            if(queens.top == -1) break;
-            // Retry the previous row at the column after its old queen.
-            col = queens.column[queens.top] + 1;
-            queens.pop();
+        else
+        {
+            // No safe column: backtrack to the previous row.
+            if (top == -1) break; // All possibilities have been tried.
+            column = stack[top] + 1;
+            pop(top);
         }
     }
-    cout << "Total solutions: " << solutions << "\n";
+    cout << "Total solutions: " << solutions << endl;
+    return 0;
 }

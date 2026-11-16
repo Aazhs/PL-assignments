@@ -1,84 +1,128 @@
 #include <iostream>
-#include <utility>
 using namespace std;
 
-// How this program works:
-// Example: [1 3] and [2 4 5] merge as [1 2 3 4 5].
-// Save the next pointers before changing any links.
-// Every forward link has a matching backward link; then sort the values.
-
-class Node{
-public:
+struct Node
+{
     int data;
-    Node *prev, *next;
-    Node(int value): data(value), prev(nullptr), next(nullptr){}
+    Node* prev;
+    Node* next;
 };
-class Dll{
-    Node* head = nullptr;
-    Node* tail = nullptr;
-    void appendNode(Node* p){
-        p->prev = tail;
-        p->next = nullptr;
-        if(tail) tail->next = p;
-        else head = p;
-        tail = p;
+
+void append(Node*& head, int value)
+{
+    Node* temp = new Node{value, nullptr, nullptr};
+    if (head == nullptr)
+    {
+        head = temp;
+        return;
     }
-public:
-    ~Dll(){
-        while(head){ Node* p = head;
-            head = head->next;
-            delete p; }
+    Node* p = head;
+    while (p->next != nullptr) p = p->next;
+    p->next = temp;
+    temp->prev = p; // Always connect both directions.
+}
+
+bool input(Node*& head)
+{
+    int n, value;
+    cout << "Enter number of nodes: ";
+    if (!(cin >> n) || n < 0) return false;
+    cout << "Enter values: ";
+    for (int i = 0; i < n; i++)
+    {
+        if (!(cin >> value)) return false;
+        append(head, value);
     }
-    bool input(){
-        int n, value;
-        cout << "Enter number of nodes: ";
-        if(!(cin >> n) || n < 0) return false;
-        cout << "Enter values: ";
-        for(int i = 0; i < n; i++){
-            if(!(cin >> value)) return false;
-            appendNode(new Node(value));
+    return true;
+}
+
+void mergeAlternate(Node*& first, Node*& second)
+{
+    if (first == nullptr)
+    {
+        first = second;
+        second = nullptr;
+        return;
+    }
+    Node* p = first;
+    Node* q = second;
+    while (p != nullptr && q != nullptr)
+    {
+        // Save the old links before putting q between p and its next node.
+        Node* nextP = p->next;
+        Node* nextQ = q->next;
+        p->next = q;
+        q->prev = p;
+        q->next = nextP;
+        if (nextP != nullptr) nextP->prev = q;
+
+        // If the first list is finished, attach the rest of the second list.
+        if (nextP == nullptr)
+        {
+            q->next = nextQ;
+            if (nextQ != nullptr) nextQ->prev = q;
+            break;
         }
-        return true;
+        p = nextP;
+        q = nextQ;
     }
-    void mergeAlternate(Dll& other){
-        Node* p = head;
-        Node* q = other.head;
-        // Insert one node from the second list after each original first-list node.
-        while(p && q){
-            // Remember both next nodes before inserting q after p.
-            Node* nextP = p->next;
-            Node* nextQ = q->next;
-            p->next = q;
-            q->prev = p;
-            q->next = nextP;
-            if(nextP) nextP->prev = q;
-            else tail = q;
-            p = nextP;
-            q = nextQ;
-        }
-        // Append leftover nodes so unequal list sizes do not lose data.
-        while(q){ Node* next = q->next; appendNode(q); q = next; }
-        other.head = other.tail = nullptr;
+    second = nullptr; // All its nodes now belong to the first list.
+}
+
+void sort(Node* head)
+{
+    // Compare each value with the values after it; swap if out of order.
+    for (Node* p = head; p != nullptr; p = p->next)
+        for (Node* q = p->next; q != nullptr; q = q->next)
+            if (p->data > q->data)
+            {
+                int temp = p->data;
+                p->data = q->data;
+                q->data = temp;
+            }
+}
+
+void display(Node* head)
+{
+    while (head != nullptr)
+    {
+        cout << head->data << " ";
+        head = head->next;
     }
-    void sort(){
-        // Swap values to sort while keeping both directions of the links intact.
-        for(Node* p = head; p; p = p->next)
-            for(Node* q = p->next; q; q = q->next)
-                if(p->data > q->data) swap(p->data, q->data);
+    cout << endl;
+}
+
+void clear(Node* head)
+{
+    while (head != nullptr)
+    {
+        Node* temp = head;
+        head = head->next;
+        delete temp;
     }
-    void display(){
-        for(Node* p = head; p; p = p->next) cout << p->data << " <-> ";
-        cout << "NULL\nReverse: ";
-        for(Node* p = tail; p; p = p->prev) cout << p->data << " <-> ";
-        cout << "NULL\n";
+}
+
+int main()
+{
+    Node* first = nullptr;
+    Node* second = nullptr;
+    cout << "First list:\n";
+    bool valid = input(first);
+    if (valid)
+    {
+        cout << "Second list:\n";
+        valid = input(second);
     }
-};
-// Program starts here: read inputs, then perform the requested operations.
-int main(){
-    Dll a, b;
-    cout << "First list:\n"; if(!a.input()) return 0;
-    cout << "Second list:\n"; if(!b.input()) return 0;
-    a.mergeAlternate(b);
-    cout << "Alternate merge: "; a.display();
-    a.sort(); cout << "Sorted list: "; a.display();
+    if (valid)
+    {
+        mergeAlternate(first, second);
+        cout << "Alternate merge: ";
+        display(first);
+        sort(first);
+        cout << "Sorted list: ";
+        display(first);
+    }
+    clear(first);
+    clear(second);
+    return 0;
 }
