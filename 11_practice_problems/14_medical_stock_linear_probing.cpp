@@ -1,3 +1,32 @@
+/*
+PRACTICE PROBLEM 14: MEDICAL STOCK: LINEAR PROBING HASH TABLE
+
+PROBLEM:
+Store medicine keys, names and quantities in a 9-slot hash table using
+hash(key) = key % 9 and linear probing for collisions.
+The PDF's replacement wording is unclear, so both variants can be selected.
+
+EXAMPLE:
+Keys 0 and 9 both belong at index 0, so 9 can use index 1.
+Insert key 1: without replacement it uses index 2; with replacement it takes
+its home index 1 and moves key 9 to index 2.
+
+HOW TO SOLVE:
+1. Select without-replacement or with-replacement mode.
+2. Read records and compute each key's home address.
+3. If the key exists, update its record instead of storing a duplicate.
+4. Find space by checking home, home+1, and so on, wrapping with % 9.
+5. Without replacement, store at the first empty slot. With replacement,
+   move a foreign home occupant to that slot and put the new key at home.
+6. Display the table, then search for a key using the same probe sequence.
+
+VARIABLES / IMPORTANT POINTS:
+table stores records; occupied[i] says whether a slot contains a medicine.
+An empty search slot proves the key is absent because deletion is not offered.
+Stop after nine probes to avoid circling forever when the table is full.
+Keys and quantities must be non-negative; zero is a valid occupied key.
+*/
+
 #include <iostream>
 #include <string>
 using namespace std;
@@ -16,10 +45,12 @@ public:
     Medicine table[9];
     bool occupied[9]; // All slots start empty.
 
+    // Mark all nine slots unused; record values are read only after their occupied flag is set.
     HashTable() {
         for (int i = 0; i < 9; i++) occupied[i] = false;
     }
 
+    // Probe at most nine positions starting at home; return the matching index or -1.
     int search(int key)
     {
         int home = key % 9;
@@ -32,8 +63,10 @@ public:
         return -1;
     }
 
+    // Update duplicate keys, otherwise find space and apply the selected replacement rule.
     void insert(Medicine item, bool replacement)
     {
+        // Check duplicates first: even a full table can update a record already present.
         int existing = search(item.key);
         if (existing != -1)
         {
@@ -42,12 +75,14 @@ public:
         }
 
         int home = item.key % 9;
+        // Keep -1 until an empty slot is found; if it stays -1, no insertion can be made.
         int empty = -1;
         for (int step = 0; step < 9; step++)
         {
             int index = (home + step) % 9;
             if (!occupied[index])
             {
+                // Remember the first free slot and stop probing; later slots are unnecessary.
                 empty = index;
                 break;
             }
@@ -62,13 +97,16 @@ public:
         // Without replacement: simply use the first empty slot found above.
         if (replacement && occupied[home] && table[home].key % 9 != home)
         {
+            // Preserve the foreign record before overwriting its old position with the new home key.
             table[empty] = table[home];
             table[home] = item;
         }
         else table[empty] = item;
+        // The previously free slot now contains a record; an occupied home stays occupied.
         occupied[empty] = true;
     }
 
+    // Print all slots so occupied records and collision positions can be inspected.
     void display()
     {
         cout << "Index\tKey\tMedicine\tQuantity\n";
@@ -80,12 +118,14 @@ public:
         }
     }
 
+    // Print the record at a successful search index supplied by main().
     void show(int index)
     {
         cout << table[index].name << "\tQuantity: " << table[index].quantity << endl;
     }
 };
 
+// Read the probing mode and medicine records, display the table, then perform one search.
 int main()
 {
     HashTable stock;

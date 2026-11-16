@@ -1,3 +1,28 @@
+/*
+PRACTICE PROBLEM 10: PALINDROME CHECK USING A DEQUE
+
+PROBLEM:
+Check whether a string reads the same forward and backward by using a deque
+(double ended queue), which supports removal at both ends.
+
+EXAMPLE:
+madam -> compare m with m, then a with a; the middle d needs no comparison.
+madam is a palindrome; hello is not.
+
+HOW TO SOLVE:
+1. Read a line and insert every character at the rear of a circular deque.
+2. While at least two characters remain, remove one from each end.
+3. If that pair differs, return false immediately.
+4. If all pairs match, return true and print Palindrome.
+
+VARIABLES / IMPORTANT POINTS:
+arr holds characters; front/rear mark the ends; count tracks stored characters.
+% MAX wraps movement around the circular array (MAX = 100).
+Empty and one-character strings are palindromes. Spaces and case are significant.
+pushFront() and display() are retained from the original deque implementation;
+this application only needs pushRear(), popFront(), popRear() and size().
+*/
+
 #include <iostream>
 #include <string>
 using namespace std;
@@ -11,21 +36,25 @@ class Deque {
     int count;
 
 public:
+    // Initialize the empty end indices and zero count before any character is inserted.
     Deque() {
         front = -1;
         rear = -1;
         count = 0;
     }
 
+    // Use count so a wrapped circular array still has an unambiguous empty condition.
     bool isEmpty() {
         return count == 0;
     }
 
+    // Prevent an insertion from overwriting characters when every slot is occupied.
     bool isFull() {
         return count == MAX;
     }
 
     // Adding MAX avoids a negative index when front wraps around.
+    // Move front one step backwards with wraparound and store a character there.
     void pushFront(char value) {
         if (isFull()) {
             cout << "Deque is full. Cannot insert at front.\n";
@@ -37,10 +66,12 @@ public:
             front = (front - 1 + MAX) % MAX;
         }
         arr[front] = value;
+        // One more character is stored; count distinguishes a full circle from an empty deque.
         count++;
         // Character stored; no extra output during palindrome checking.
     }
 
+    // Move rear one step forwards with wraparound and store the next input character.
     void pushRear(char value) {
         if (isFull()) {
             cout << "Deque is full. Cannot insert at rear.\n";
@@ -57,21 +88,25 @@ public:
     }
 
     // Return the removed character so the caller can compare the pair.
+    // Save the first character, advance front, and return the saved value for comparison.
     char popFront() {
         if (isEmpty()) {
             cout << "Deque is empty. Cannot delete from front.\n";
             return '\0';
         }
+        // Save before changing the front index; this is the character the caller should receive.
         char value = arr[front];
         count--;
         if (isEmpty()) {
             front = rear = -1;
         } else {
+            // Move towards the next character; index MAX-1 wraps back to 0.
             front = (front + 1) % MAX;
         }
         return value;
     }
 
+    // Save the last character, retreat rear, and return the saved value for comparison.
     char popRear() {
         if (isEmpty()) {
             cout << "Deque is empty. Cannot delete from rear.\n";
@@ -82,11 +117,13 @@ public:
         if (isEmpty()) {
             front = rear = -1;
         } else {
+            // Adding MAX keeps the result non-negative when rear was 0.
             rear = (rear - 1 + MAX) % MAX;
         }
         return value;
     }
 
+    // Follow count circular positions starting at front, rather than assuming front <= rear.
     void display() {
         if (isEmpty()) {
             cout << "Deque is empty.\n";
@@ -99,11 +136,13 @@ public:
         }
         cout << "\n";
     }
+    // Return how many characters remain; the palindrome loop stops at zero or one.
     int size() {
         return count;
     }
 };
 
+// Load a local deque, then compare and remove matching pairs from opposite ends.
 bool palindrome(string text)
 {
     Deque letters;
@@ -116,11 +155,13 @@ bool palindrome(string text)
     {
         char first = letters.popFront();
         char last = letters.popRear();
+        // A single unequal pair proves that the original string cannot read the same backwards.
         if (first != last) return false;
     }
     return true; // No mismatches; empty and one-character strings also pass.
 }
 
+// Read the entire line, check its length, and print the result of the deque comparison.
 int main()
 {
     string text;

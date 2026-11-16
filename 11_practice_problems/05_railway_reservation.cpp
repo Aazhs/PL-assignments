@@ -1,3 +1,31 @@
+/*
+PRACTICE PROBLEM 5: RAILWAY RESERVATION USING A CIRCULAR LINKED LIST
+
+PROBLEM:
+Manage passenger reservations for one train with 10 seats. Allow booking,
+cancelling by reservation ID, and displaying the current passengers.
+Use a circular linked list to store reservations.
+
+EXAMPLE:
+Book Alice -> ID 1, book Bob -> ID 2. Cancel ID 1 -> only Bob remains.
+The remaining last node still links back to the first node.
+
+HOW TO SOLVE:
+1. Start with tail = nullptr and size = 0.
+2. Booking creates a passenger node with a new, unique ID.
+3. Insert after tail and move tail to the new node; tail->next is the head.
+4. Cancellation travels around the circle looking for the requested ID.
+5. Bypass and delete that node, updating tail if the last node was removed.
+6. Display visits the circle once, stopping on return to the first node.
+7. Repeat the menu so several bookings and cancellations can be practised.
+
+VARIABLES / IMPORTANT POINTS:
+capacity = 10; size = current bookings; nextId never reuses an old ID.
+previous is needed to unlink current during cancellation.
+For a single node, next points to itself. Removing it makes tail nullptr.
+A full train rejects a booking. An unknown ID reports not found.
+*/
+
 #include <iostream>
 #include <string>
 using namespace std;
@@ -9,6 +37,7 @@ public:
     string name;
     Node* next;
 
+    // Store a reservation ID and passenger name; add() will connect the circular link.
     Node(int number, string passenger) {
         id = number;
         name = passenger;
@@ -26,6 +55,7 @@ public:
     int capacity;
     int nextId;
 
+    // Initialize an empty train, its seat limit, and the first ID to issue.
     Queue() {
         tail = nullptr;
         size = 0;
@@ -33,19 +63,23 @@ public:
         nextId = 1;
     }
 
+    // Free reservations automatically on exit, including when input ends early.
     ~Queue() {
         clear();
     }
 
+    // There are no passengers exactly when tail has no node to point to.
     bool isEmpty() {
         return tail == nullptr;
     }
 
+    // Compare current reservations with seat capacity before allocating another node.
     bool isFull() {
         return size == capacity;
     }
 
     // tail points to the last passenger; tail->next points to the first.
+    // Create one booking and insert it at the tail while preserving the circle.
     void add(string name)
     {
         if (isFull())
@@ -53,12 +87,16 @@ public:
             cout << "All 10 seats are booked.\n";
             return;
         }
+        // Allocate a separate passenger record only after confirming a seat is free.
         Node* temp = new Node(nextId, name);
+        // Advance the ID even if this passenger is cancelled later, keeping IDs unique.
         nextId++;
         if (isEmpty()) temp->next = temp; // Single node points to itself.
         else
         {
+            // The new last node must point to the old head before the old tail is changed.
             temp->next = tail->next;
+            // Connect the old last node to the new last node, completing the circle.
             tail->next = temp;
         }
         tail = temp;
@@ -66,6 +104,7 @@ public:
         cout << "Reservation ID: " << temp->id << endl;
     }
 
+    // Search once around the circle and unlink the matching ID, handling the one-node case.
     void cancel(int id)
     {
         if (isEmpty())
@@ -73,12 +112,14 @@ public:
             cout << "Reservation not found.\n";
             return;
         }
+        // The node before the head is tail, so cancellation of the first node works too.
         Node* previous = tail;
         Node* current = tail->next;
         do
         {
             if (current->id == id)
             {
+                // A node is its own predecessor only in a one-node circle.
                 if (current == previous) tail = nullptr; // Only one node remains.
                 else
                 {
@@ -96,6 +137,7 @@ public:
         cout << "Reservation not found.\n";
     }
 
+    // A do-while visits the head first and stops before displaying any passenger twice.
     void show()
     {
         if (isEmpty())
@@ -111,12 +153,14 @@ public:
         } while (p != tail->next);
     }
 
+    // Break the circular link first, then free nodes using ordinary linear traversal.
     void clear()
     {
         // Break the circle, then delete nodes like an ordinary linked list.
         if (tail != nullptr)
         {
             Node* p = tail->next;
+            // Turn the circle into a line; otherwise deletion traversal could return to freed memory.
             tail->next = nullptr;
             while (p != nullptr)
             {
@@ -128,6 +172,7 @@ public:
     }
 };
 
+// Run the booking menu; each choice calls the circular list operation for that action.
 int main()
 {
     Queue train;
