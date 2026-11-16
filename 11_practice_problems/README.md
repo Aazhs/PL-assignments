@@ -1,7 +1,11 @@
 # Practice Problems (1-14)
 
-Standalone C++ programs using plain functions, arrays and simple structs,
-with braces on separate lines and step-by-step comments. Most programs read
+Standalone C++ programs with simple classes for data structures (stack, queue,
+deque, linked lists, phone book and hash tables). Each class keeps its data and
+operations together, using plain arrays or pointers inside. There are no STL
+container classes, templates or inheritance. Basic array, matrix and sorting
+exercises keep ordinary functions. Braces are on separate lines, with
+step-by-step comments. Most programs read
 input once and print the result, like the supplied array-rotation example.
 Only railway reservation keeps a menu for repeated bookings and cancellations.
 Compile and run each file separately (each has its own `main`):

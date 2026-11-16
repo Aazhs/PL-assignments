@@ -2,39 +2,52 @@
 #include <string>
 using namespace std;
 
-void pushRear(char deque[], int& rear, char value)
+// Keep the data and its operations together in one simple class.
+class Deque
 {
-    rear++;
-    deque[rear] = value;
-}
+public:
+    char deque[100];
+    int front = 0;
+    int rear = -1;
 
-char popFront(char deque[], int& front)
-{
-    char value = deque[front];
-    front++; // Move the front towards the middle.
-    return value;
-}
+    void pushRear(char value)
+    {
+        rear++;
+        deque[rear] = value;
+    }
 
-char popRear(char deque[], int& rear)
-{
-    char value = deque[rear];
-    rear--; // Move the rear towards the middle.
-    return value;
-}
+    char popFront()
+    {
+        char value = deque[front];
+        front++; // Move the front towards the middle.
+        return value;
+    }
+
+    char popRear()
+    {
+        char value = deque[rear];
+        rear--; // Move the rear towards the middle.
+        return value;
+    }
+
+    int size()
+    {
+        return rear - front + 1;
+    }
+};
 
 bool palindrome(string text)
 {
-    char deque[100];
-    int front = 0, rear = -1;
+    Deque letters;
     for (int i = 0; i < int(text.size()); i++)
-        pushRear(deque, rear, text[i]);
+        letters.pushRear(text[i]);
 
     // A deque lets us remove characters from both ends.
     // For "madam": m matches m, a matches a, then only d remains.
-    while (front < rear)
+    while (letters.size() > 1)
     {
-        char first = popFront(deque, front);
-        char last = popRear(deque, rear);
+        char first = letters.popFront();
+        char last = letters.popRear();
         if (first != last) return false;
     }
     return true; // No mismatches; empty and one-character strings also pass.

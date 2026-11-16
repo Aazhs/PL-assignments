@@ -2,54 +2,33 @@
 #include <iomanip>
 using namespace std;
 
-struct Process
+class Process
 {
+public:
     int id, arrival, burst;
 };
 
-void schedule(Process p[], int n, bool sjf)
+// A simple queue class owns the ready-process indices and their count.
+class Queue
 {
-    int ready[100], count = 0;
-    bool added[100] = {}; // True once a process has entered the ready queue.
-    long long time = 0, totalWait = 0, totalTurn = 0;
-    cout << "PID\tArrival\tBurst\tStart\tFinish\tWait\tTurnaround\n";
+public:
+    int ready[100];
+    int count = 0;
 
-    for (int completed = 0; completed < n; completed++)
+    void enqueue(int index)
     {
-        // Add processes that arrived while the previous process was running.
-        for (int i = 0; i < n; i++)
-        {
-            if (!added[i] && p[i].arrival <= time)
-            {
-                ready[count] = i;
-                count++;
-                added[i] = true;
-            }
-        }
+        ready[count] = index;
+        count++;
+    }
 
-        if (count == 0)
-        {
-            // CPU is idle: find the earliest arrival still to come.
-            int next = -1;
-            for (int i = 0; i < n; i++)
-            {
-                if (!added[i])
-                {
-                    if (next == -1 || p[i].arrival < p[next].arrival) next = i;
-                }
-            }
-            time = p[next].arrival;
-            for (int i = 0; i < n; i++)
-            {
-                if (!added[i] && p[i].arrival <= time)
-                {
-                    ready[count] = i;
-                    count++;
-                    added[i] = true;
-                }
-            }
-        }
+    bool isEmpty()
+    {
+        return count == 0;
+    }
 
+    // Choose and remove the next process using the requested scheduling rule.
+    int dequeue(Process p[], bool sjf)
+    {
         // Find the next process in the array-based ready queue.
         int best = 0;
         for (int i = 1; i < count; i++)
@@ -66,10 +45,57 @@ void schedule(Process p[], int n, bool sjf)
             if (choose) best = i;
         }
 
-        Process current = p[ready[best]];
+        int selected = ready[best];
         // Remove the chosen process from the ready queue.
         for (int i = best; i < count - 1; i++) ready[i] = ready[i + 1];
         count--;
+
+        return selected;
+    }
+};
+
+void schedule(Process p[], int n, bool sjf)
+{
+    Queue queue;
+    bool added[100] = {}; // True once a process has entered the ready queue.
+    long long time = 0, totalWait = 0, totalTurn = 0;
+    cout << "PID\tArrival\tBurst\tStart\tFinish\tWait\tTurnaround\n";
+
+    for (int completed = 0; completed < n; completed++)
+    {
+        // Add processes that arrived while the previous process was running.
+        for (int i = 0; i < n; i++)
+        {
+            if (!added[i] && p[i].arrival <= time)
+            {
+                queue.enqueue(i);
+                added[i] = true;
+            }
+        }
+
+        if (queue.isEmpty())
+        {
+            // CPU is idle: find the earliest arrival still to come.
+            int next = -1;
+            for (int i = 0; i < n; i++)
+            {
+                if (!added[i])
+                {
+                    if (next == -1 || p[i].arrival < p[next].arrival) next = i;
+                }
+            }
+            time = p[next].arrival;
+            for (int i = 0; i < n; i++)
+            {
+                if (!added[i] && p[i].arrival <= time)
+                {
+                    queue.enqueue(i);
+                    added[i] = true;
+                }
+            }
+        }
+
+        Process current = p[queue.dequeue(p, sjf)];
 
         long long start = time;
         time += current.burst; // Non-preemptive: run this process to completion.

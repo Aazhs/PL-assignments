@@ -2,74 +2,99 @@
 #include <cstdlib>
 using namespace std;
 
-// An array is the stack: index = row, value = queen's column.
-// top is the last occupied row; -1 means the stack is empty.
-void push(int stack[], int& top, int column)
+// Keep the data and its operations together in one simple class.
+class Stack
 {
-    top++;
-    stack[top] = column;
-}
+public:
+    int stack[8];
+    int top = -1;
 
-void pop(int& top)
-{
-    top--;
-}
-
-bool safe(int stack[], int top, int column)
-{
-    int row = top + 1;
-    for (int i = 0; i <= top; i++)
+    // An array is the stack: index = row, value = queen's column.
+    // top is the last occupied row; -1 means the stack is empty.
+    void push(int column)
     {
-        if (stack[i] == column) return false; // Same column.
-        // On a diagonal, the row distance equals the column distance.
-        if (abs(stack[i] - column) == row - i) return false;
+        top++;
+        stack[top] = column;
     }
-    return true;
-}
 
-void display(int stack[])
-{
-    for (int row = 0; row < 8; row++)
+    void pop()
     {
-        for (int column = 0; column < 8; column++)
+        top--;
+    }
+
+    bool safe(int column)
+    {
+        int row = top + 1;
+        for (int i = 0; i <= top; i++)
         {
-            if (stack[row] == column) cout << "Q ";
-            else cout << ". ";
+            if (stack[i] == column) return false; // Same column.
+            // On a diagonal, the row distance equals the column distance.
+            if (abs(stack[i] - column) == row - i) return false;
         }
-        cout << endl;
+        return true;
     }
-}
+
+    void display()
+    {
+        for (int row = 0; row < 8; row++)
+        {
+            for (int column = 0; column < 8; column++)
+            {
+                if (stack[row] == column) cout << "Q ";
+                else cout << ". ";
+            }
+            cout << endl;
+        }
+    }
+
+    // Read the top value without removing it.
+    int peek()
+    {
+        return stack[top];
+    }
+
+    bool isEmpty()
+    {
+        return top == -1;
+    }
+
+    int size()
+    {
+        return top + 1;
+    }
+};
 
 int main()
 {
-    int stack[8], top = -1, column = 0, solutions = 0;
+    Stack queens;
+    int column = 0, solutions = 0;
     while (true)
     {
         // Try columns from left to right in the next empty row.
-        while (column < 8 && !safe(stack, top, column)) column++;
+        while (column < 8 && !queens.safe(column)) column++;
         if (column < 8)
         {
-            push(stack, top, column);
+            queens.push(column);
             column = 0; // Start the next row at its first column.
-            if (top == 7)
+            if (queens.size() == 8)
             {
                 solutions++; // All eight queens have been placed safely.
                 if (solutions == 1)
                 {
                     cout << "First solution:\n";
-                    display(stack);
+                    queens.display();
                 }
                 // Remove the last queen and look for another solution.
-                column = stack[top] + 1;
-                pop(top);
+                column = queens.peek() + 1;
+                queens.pop();
             }
         }
         else
         {
             // No safe column: backtrack to the previous row.
-            if (top == -1) break; // All possibilities have been tried.
-            column = stack[top] + 1;
-            pop(top);
+            if (queens.isEmpty()) break; // All possibilities have been tried.
+            column = queens.peek() + 1;
+            queens.pop();
         }
     }
     cout << "Total solutions: " << solutions << endl;

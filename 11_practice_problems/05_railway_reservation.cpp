@@ -2,83 +2,109 @@
 #include <string>
 using namespace std;
 
-struct Node
+class Node
 {
+public:
     int id;
     string name;
     Node* next;
 };
 
-// tail points to the last passenger; tail->next points to the first.
-void reserve(Node*& tail, int& count, int& nextId, string name)
+// Keep the data and its operations together in one simple class.
+class Railway
 {
-    if (count == 10)
-    {
-        cout << "All 10 seats are booked.\n";
-        return;
-    }
-    Node* temp = new Node{nextId, name, nullptr};
-    nextId++;
-    if (tail == nullptr) temp->next = temp; // Single node points to itself.
-    else
-    {
-        temp->next = tail->next;
-        tail->next = temp;
-    }
-    tail = temp;
-    count++;
-    cout << "Reservation ID: " << temp->id << endl;
-}
+public:
+    Node* tail = nullptr;
+    int count = 0;
+    int nextId = 1;
 
-void cancel(Node*& tail, int& count, int id)
-{
-    if (tail == nullptr)
+    // tail points to the last passenger; tail->next points to the first.
+    void reserve(string name)
     {
-        cout << "Reservation not found.\n";
-        return;
-    }
-    Node* previous = tail;
-    Node* current = tail->next;
-    do
-    {
-        if (current->id == id)
+        if (count == 10)
         {
-            if (current == previous) tail = nullptr; // Only one node remains.
-            else
-            {
-                previous->next = current->next; // Skip the cancelled node.
-                if (current == tail) tail = previous;
-            }
-            delete current;
-            count--;
-            cout << "Reservation cancelled.\n";
+            cout << "All 10 seats are booked.\n";
             return;
         }
-        previous = current;
-        current = current->next;
-    } while (current != tail->next); // Stop after one complete circle.
-    cout << "Reservation not found.\n";
-}
-
-void display(Node* tail)
-{
-    if (tail == nullptr)
-    {
-        cout << "No reservations.\n";
-        return;
+        Node* temp = new Node{nextId, name, nullptr};
+        nextId++;
+        if (tail == nullptr) temp->next = temp; // Single node points to itself.
+        else
+        {
+            temp->next = tail->next;
+            tail->next = temp;
+        }
+        tail = temp;
+        count++;
+        cout << "Reservation ID: " << temp->id << endl;
     }
-    Node* p = tail->next;
-    do
+
+    void cancel(int id)
     {
-        cout << p->id << "\t" << p->name << endl;
-        p = p->next;
-    } while (p != tail->next);
-}
+        if (tail == nullptr)
+        {
+            cout << "Reservation not found.\n";
+            return;
+        }
+        Node* previous = tail;
+        Node* current = tail->next;
+        do
+        {
+            if (current->id == id)
+            {
+                if (current == previous) tail = nullptr; // Only one node remains.
+                else
+                {
+                    previous->next = current->next; // Skip the cancelled node.
+                    if (current == tail) tail = previous;
+                }
+                delete current;
+                count--;
+                cout << "Reservation cancelled.\n";
+                return;
+            }
+            previous = current;
+            current = current->next;
+        } while (current != tail->next); // Stop after one complete circle.
+        cout << "Reservation not found.\n";
+    }
+
+    void display()
+    {
+        if (tail == nullptr)
+        {
+            cout << "No reservations.\n";
+            return;
+        }
+        Node* p = tail->next;
+        do
+        {
+            cout << p->id << "\t" << p->name << endl;
+            p = p->next;
+        } while (p != tail->next);
+    }
+
+    void clear()
+    {
+        // Break the circle, then delete nodes like an ordinary linked list.
+        if (tail != nullptr)
+        {
+            Node* p = tail->next;
+            tail->next = nullptr;
+            while (p != nullptr)
+            {
+                Node* temp = p;
+                p = p->next;
+                delete temp;
+            }
+        }
+    }
+};
 
 int main()
 {
-    Node* tail = nullptr;
-    int count = 0, nextId = 1, choice, id;
+    Railway train;
+    int choice, id;
     string name;
 
     // A small menu is useful here so we can reserve and cancel repeatedly.
@@ -90,29 +116,18 @@ int main()
         {
             cout << "Enter passenger name: ";
             if (!getline(cin >> ws, name)) break;
-            reserve(tail, count, nextId, name);
+            train.reserve(name);
         }
         else if (choice == 2)
         {
             cout << "Enter reservation ID: ";
             if (!(cin >> id)) break;
-            cancel(tail, count, id);
+            train.cancel(id);
         }
-        else if (choice == 3) display(tail);
+        else if (choice == 3) train.display();
         else cout << "Invalid choice.\n";
     }
 
-    // Break the circle, then delete nodes like an ordinary linked list.
-    if (tail != nullptr)
-    {
-        Node* p = tail->next;
-        tail->next = nullptr;
-        while (p != nullptr)
-        {
-            Node* temp = p;
-            p = p->next;
-            delete temp;
-        }
-    }
+    train.clear();
     return 0;
 }

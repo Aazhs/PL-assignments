@@ -3,124 +3,133 @@
 using namespace std;
 
 // One term, such as 5x^2, stores coefficient 5 and exponent 2.
-struct Node
+class Node
 {
+public:
     double coefficient;
     int exponent;
     Node* next;
 };
 
-void insert(Node*& head, double coefficient, int exponent)
+// Keep the data and its operations together in one simple class.
+class Polynomial
 {
-    // head is passed by reference because inserting first may change it.
-    Node* current = head;
-    Node* previous = nullptr;
+public:
+    Node* head = nullptr;
 
-    // Keep terms in descending order of exponent.
-    while (current != nullptr && current->exponent > exponent)
+    void insert(double coefficient, int exponent)
     {
-        previous = current;
-        current = current->next;
-    }
+        // head belongs to this polynomial; inserting first may change it.
+        Node* current = head;
+        Node* previous = nullptr;
 
-    if (current != nullptr && current->exponent == exponent)
-    {
-        // Same power: add the coefficients instead of making another node.
-        current->coefficient += coefficient;
-    }
-    else
-    {
-        Node* temp = new Node{coefficient, exponent, current};
-        if (previous == nullptr) head = temp;
-        else previous->next = temp;
-    }
-}
-
-bool input(Node*& head)
-{
-    int n, exponent;
-    double coefficient;
-    cout << "Enter number of terms: ";
-    if (!(cin >> n) || n < 0) return false;
-    cout << "Enter coefficient and exponent for each term:\n";
-    for (int i = 0; i < n; i++)
-    {
-        if (!(cin >> coefficient >> exponent) || exponent < 0) return false;
-        insert(head, coefficient, exponent);
-    }
-    return true;
-}
-
-void add(Node* first, Node* second, Node*& result)
-{
-    // Insert every term into the result; insert() combines equal powers.
-    while (first != nullptr)
-    {
-        insert(result, first->coefficient, first->exponent);
-        first = first->next;
-    }
-    while (second != nullptr)
-    {
-        insert(result, second->coefficient, second->exponent);
-        second = second->next;
-    }
-}
-
-void display(Node* head)
-{
-    bool first = true;
-    while (head != nullptr)
-    {
-        // Terms that cancel to zero should not appear in the answer.
-        if (head->coefficient != 0)
+        // Keep terms in descending order of exponent.
+        while (current != nullptr && current->exponent > exponent)
         {
-            if (!first)
-            {
-                if (head->coefficient < 0) cout << " - ";
-                else cout << " + ";
-            }
-            else if (head->coefficient < 0) cout << "-";
-            cout << abs(head->coefficient);
-            if (head->exponent != 0) cout << "x^" << head->exponent;
-            first = false;
+            previous = current;
+            current = current->next;
         }
-        head = head->next;
-    }
-    if (first) cout << "0";
-    cout << endl;
-}
 
-void clear(Node* head)
-{
-    // Save the next address before deleting the current node.
-    while (head != nullptr)
-    {
-        Node* temp = head;
-        head = head->next;
-        delete temp;
+        if (current != nullptr && current->exponent == exponent)
+        {
+            // Same power: add the coefficients instead of making another node.
+            current->coefficient += coefficient;
+        }
+        else
+        {
+            Node* temp = new Node{coefficient, exponent, current};
+            if (previous == nullptr) head = temp;
+            else previous->next = temp;
+        }
     }
-}
+
+    bool input()
+    {
+        int n, exponent;
+        double coefficient;
+        cout << "Enter number of terms: ";
+        if (!(cin >> n) || n < 0) return false;
+        cout << "Enter coefficient and exponent for each term:\n";
+        for (int i = 0; i < n; i++)
+        {
+            if (!(cin >> coefficient >> exponent) || exponent < 0) return false;
+            insert(coefficient, exponent);
+        }
+        return true;
+    }
+
+    void add(Polynomial& other, Polynomial& result)
+    {
+        Node* first = head;
+        Node* second = other.head;
+        // Insert every term into the result; insert() combines equal powers.
+        while (first != nullptr)
+        {
+            result.insert(first->coefficient, first->exponent);
+            first = first->next;
+        }
+        while (second != nullptr)
+        {
+            result.insert(second->coefficient, second->exponent);
+            second = second->next;
+        }
+    }
+
+    void display()
+    {
+        Node* current = head;
+        bool first = true;
+        while (current != nullptr)
+        {
+            // Terms that cancel to zero should not appear in the answer.
+            if (current->coefficient != 0)
+            {
+                if (!first)
+                {
+                    if (current->coefficient < 0) cout << " - ";
+                    else cout << " + ";
+                }
+                else if (current->coefficient < 0) cout << "-";
+                cout << abs(current->coefficient);
+                if (current->exponent != 0) cout << "x^" << current->exponent;
+                first = false;
+            }
+            current = current->next;
+        }
+        if (first) cout << "0";
+        cout << endl;
+    }
+
+    void clear()
+    {
+        // Save the next address before deleting the current node.
+        while (head != nullptr)
+        {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+};
 
 int main()
 {
-    Node* first = nullptr;
-    Node* second = nullptr;
-    Node* result = nullptr;
+    Polynomial first, second, result;
     cout << "First polynomial:\n";
-    bool valid = input(first);
+    bool valid = first.input();
     if (valid)
     {
         cout << "Second polynomial:\n";
-        valid = input(second);
+        valid = second.input();
     }
     if (valid)
     {
-        add(first, second, result);
+        first.add(second, result);
         cout << "Sum: ";
-        display(result);
+        result.display();
     }
-    clear(first);
-    clear(second);
-    clear(result);
+    first.clear();
+    second.clear();
+    result.clear();
     return 0;
 }
