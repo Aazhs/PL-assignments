@@ -2,44 +2,70 @@
 #include <cmath>
 using namespace std;
 
-// One term, such as 5x^2, stores coefficient 5 and exponent 2.
-class Node
-{
+// Adapted from PL/linked/polynomial.cpp using a singly linked list.
+class Node {
 public:
     double coefficient;
     int exponent;
     Node* next;
+
+    Node(double c, int e) {
+        coefficient = c;
+        exponent = e;
+        next = nullptr;
+    }
 };
 
-// Keep the data and its operations together in one simple class.
-class Polynomial
-{
+class Polynomial {
 public:
-    Node* head = nullptr;
+    Node* head;
+    Node* tail;
 
-    void insert(double coefficient, int exponent)
-    {
-        // head belongs to this polynomial; inserting first may change it.
-        Node* current = head;
-        Node* previous = nullptr;
+    Polynomial() {
+        head = nullptr;
+        tail = nullptr;
+    }
 
-        // Keep terms in descending order of exponent.
-        while (current != nullptr && current->exponent > exponent)
-        {
-            previous = current;
+    ~Polynomial() {
+        while (head != nullptr) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+
+    // Same append-at-tail pattern as addTerm() in the original polynomial code.
+    void addTerm(double coefficient, int exponent) {
+        Node* newNode = new Node(coefficient, exponent);
+        if (head == nullptr) {
+            head = newNode;
+            tail = newNode;
+        } else {
+            tail->next = newNode;
+            tail = newNode;
+        }
+    }
+
+    // Find the matching exponent in the result before adding a new term.
+    void addToResult(Polynomial& result, double coefficient, int exponent) {
+        Node* current = result.head;
+        while (current != nullptr && current->exponent != exponent) {
             current = current->next;
         }
-
-        if (current != nullptr && current->exponent == exponent)
-        {
-            // Same power: add the coefficients instead of making another node.
+        if (current != nullptr) {
             current->coefficient += coefficient;
+        } else {
+            result.addTerm(coefficient, exponent);
         }
-        else
-        {
-            Node* temp = new Node{coefficient, exponent, current};
-            if (previous == nullptr) head = temp;
-            else previous->next = temp;
+    }
+
+    void add(Polynomial& other, Polynomial& result) {
+        // Copy both inputs into the result, combining matching exponents.
+        for (Node* current = head; current != nullptr; current = current->next) {
+            addToResult(result, current->coefficient, current->exponent);
+        }
+        for (Node* current = other.head; current != nullptr; current = current->next) {
+            addToResult(result, current->coefficient, current->exponent);
         }
     }
 
@@ -53,26 +79,9 @@ public:
         for (int i = 0; i < n; i++)
         {
             if (!(cin >> coefficient >> exponent) || exponent < 0) return false;
-            insert(coefficient, exponent);
+            addTerm(coefficient, exponent);
         }
         return true;
-    }
-
-    void add(Polynomial& other, Polynomial& result)
-    {
-        Node* first = head;
-        Node* second = other.head;
-        // Insert every term into the result; insert() combines equal powers.
-        while (first != nullptr)
-        {
-            result.insert(first->coefficient, first->exponent);
-            first = first->next;
-        }
-        while (second != nullptr)
-        {
-            result.insert(second->coefficient, second->exponent);
-            second = second->next;
-        }
     }
 
     void display()
@@ -100,16 +109,6 @@ public:
         cout << endl;
     }
 
-    void clear()
-    {
-        // Save the next address before deleting the current node.
-        while (head != nullptr)
-        {
-            Node* temp = head;
-            head = head->next;
-            delete temp;
-        }
-    }
 };
 
 int main()
@@ -128,8 +127,5 @@ int main()
         cout << "Sum: ";
         result.display();
     }
-    first.clear();
-    second.clear();
-    result.clear();
     return 0;
 }

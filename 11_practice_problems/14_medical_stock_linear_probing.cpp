@@ -14,7 +14,11 @@ class HashTable
 {
 public:
     Medicine table[9];
-    bool occupied[9] = {}; // All slots start empty.
+    bool occupied[9]; // All slots start empty.
+
+    HashTable() {
+        for (int i = 0; i < 9; i++) occupied[i] = false;
+    }
 
     int search(int key)
     {

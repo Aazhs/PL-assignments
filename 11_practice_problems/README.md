@@ -4,9 +4,9 @@ Standalone C++ programs with simple classes for data structures (stack, queue,
 deque, linked lists, phone book and hash tables). Each class keeps its data and
 operations together, using plain arrays or pointers inside. There are no STL
 container classes, templates or inheritance. Basic array, matrix and sorting
-exercises keep ordinary functions. Braces are on separate lines, with
-step-by-step comments. Most programs read
-input once and print the result, like the supplied array-rotation example.
+exercises keep ordinary functions. Constructors, method names and pointer/index
+operations follow the matching original PL programs, with step-by-step comments.
+Most programs read input once and print the result, like the supplied array-rotation example.
 Only railway reservation keeps a menu for repeated bookings and cancellations.
 Compile and run each file separately (each has its own `main`):
 
@@ -35,7 +35,8 @@ c++ -std=c++11 -Wall -Wextra -pedantic 01_array_rotation.cpp -o /tmp/practice
 ## Conventions
 
 - Rotation prints left and right rotations of the original array. Use k >= 0.
-- Polynomials accept non-negative exponents and combine repeated powers.
+- Polynomials accept non-negative exponents. Addition combines repeated powers
+  in first-appearance order, matching the original addToResult() approach.
 - Alternate merging consumes both input lists and appends any leftover nodes.
 - Railway reservation models one train with 10 seats and unique reservation IDs.
 - Hospital priorities: 1 emergency, 2 urgent, 3 routine. Equal priorities use FIFO.
@@ -57,3 +58,26 @@ c++ -std=c++11 -Wall -Wextra -pedantic 01_array_rotation.cpp -o /tmp/practice
 - Programs expect the prompted input types; failed input ends the program.
   Array sizes and relevant ranges are checked. Use values whose arithmetic fits
   the declared numeric types.
+
+## Original PL code used
+
+These paths are relative to the parent `PL` folder:
+
+| Practice | Original source | Reused pattern |
+| --- | --- | --- |
+| 3 | `linked/polynomial.cpp` | `addTerm`, `addToResult`, `add`, head/tail traversal |
+| 4 | `linked/doubly.cpp` | `Node`, `Dll`, `create`, node-swapping `sort` |
+| 5 | `linked/pizza.cpp` | Circular `Queue`, tail/size/capacity, `add`, `show` |
+| 6 | `stack/stack.cpp` | Array stack, `push`, returning `pop`, `peek`, `isEmpty` |
+| 8 | `queue.cpp` | front/rear, constructor, `enqueue`, `dequeue`, `display` |
+| 9 | `queue.cpp`, `round_robin.cpp` | Queue operations and ready-process index approach |
+| 10 | `stack/deque.cpp` | Circular front/rear/count, all four end operations |
+| 11 | `assignment10_class.cpp` | Shift-right insertion loop from `insertionSortByName` |
+
+Application-specific changes include patient priority ordering, selecting FCFS/SJF,
+comparing deque characters, cancelling a reservation by ID, and alternate merging.
+The original polynomial file mixes `Term` and `Node`; the adapted version consistently
+uses `Node`. The original doubly linked sort also needs an empty-list check.
+No matching implementations were found for rotation, matrix arithmetic, Hanoi,
+merge sort or the two hash exercises; those use the same basic function/class style.
+The original files outside `assignments` are unchanged.

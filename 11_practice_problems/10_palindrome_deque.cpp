@@ -2,37 +2,105 @@
 #include <string>
 using namespace std;
 
-// Keep the data and its operations together in one simple class.
-class Deque
-{
+// Adapted from PL/stack/deque.cpp: the array now stores characters.
+const int MAX = 100;
+class Deque {
+    char arr[MAX];
+    int front;
+    int rear;
+    int count;
+
 public:
-    char deque[100];
-    int front = 0;
-    int rear = -1;
-
-    void pushRear(char value)
-    {
-        rear++;
-        deque[rear] = value;
+    Deque() {
+        front = -1;
+        rear = -1;
+        count = 0;
     }
 
-    char popFront()
-    {
-        char value = deque[front];
-        front++; // Move the front towards the middle.
+    bool isEmpty() {
+        return count == 0;
+    }
+
+    bool isFull() {
+        return count == MAX;
+    }
+
+    // Adding MAX avoids a negative index when front wraps around.
+    void pushFront(char value) {
+        if (isFull()) {
+            cout << "Deque is full. Cannot insert at front.\n";
+            return;
+        }
+        if (isEmpty()) {
+            front = rear = 0;
+        } else {
+            front = (front - 1 + MAX) % MAX;
+        }
+        arr[front] = value;
+        count++;
+        // Character stored; no extra output during palindrome checking.
+    }
+
+    void pushRear(char value) {
+        if (isFull()) {
+            cout << "Deque is full. Cannot insert at rear.\n";
+            return;
+        }
+        if (isEmpty()) {
+            front = rear = 0;
+        } else {
+            rear = (rear + 1) % MAX;
+        }
+        arr[rear] = value;
+        count++;
+        // Character stored; compare it later from either end.
+    }
+
+    // Return the removed character so the caller can compare the pair.
+    char popFront() {
+        if (isEmpty()) {
+            cout << "Deque is empty. Cannot delete from front.\n";
+            return '\0';
+        }
+        char value = arr[front];
+        count--;
+        if (isEmpty()) {
+            front = rear = -1;
+        } else {
+            front = (front + 1) % MAX;
+        }
         return value;
     }
 
-    char popRear()
-    {
-        char value = deque[rear];
-        rear--; // Move the rear towards the middle.
+    char popRear() {
+        if (isEmpty()) {
+            cout << "Deque is empty. Cannot delete from rear.\n";
+            return '\0';
+        }
+        char value = arr[rear];
+        count--;
+        if (isEmpty()) {
+            front = rear = -1;
+        } else {
+            rear = (rear - 1 + MAX) % MAX;
+        }
         return value;
     }
 
-    int size()
-    {
-        return rear - front + 1;
+    void display() {
+        if (isEmpty()) {
+            cout << "Deque is empty.\n";
+            return;
+        }
+        cout << "Deque elements (front -> rear): ";
+        for (int i = 0, idx = front; i < count; i++) {
+            cout << arr[idx] << " ";
+            idx = (idx + 1) % MAX;
+        }
+        cout << "\n";
+    }
+    int size() {
+        return count;
     }
 };
 

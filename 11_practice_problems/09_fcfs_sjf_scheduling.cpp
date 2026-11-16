@@ -8,49 +8,58 @@ public:
     int id, arrival, burst;
 };
 
-// A simple queue class owns the ready-process indices and their count.
-class Queue
-{
+// Adapted from PL/queue.cpp. Store process indices instead of plain values.
+// Insertion orders the ready processes; dequeue still removes from front.
+const int MAX = 100;
+
+class Queue {
+    int arr[MAX];
+    int front;
+    int rear;
+
 public:
-    int ready[100];
-    int count = 0;
-
-    void enqueue(int index)
-    {
-        ready[count] = index;
-        count++;
+    Queue() {
+        front = -1;
+        rear = -1;
     }
 
-    bool isEmpty()
-    {
-        return count == 0;
+    bool isEmpty() {
+        return front == -1;
     }
 
-    // Choose and remove the next process using the requested scheduling rule.
-    int dequeue(Process p[], bool sjf)
-    {
-        // Find the next process in the array-based ready queue.
-        int best = 0;
-        for (int i = 1; i < count; i++)
-        {
-            int a = ready[i];
-            int b = ready[best];
-            bool choose;
-            if (sjf && p[a].burst != p[b].burst)
-                choose = p[a].burst < p[b].burst; // SJF: smaller burst wins.
-            else if (p[a].arrival != p[b].arrival)
-                choose = p[a].arrival < p[b].arrival; // FCFS, or SJF tie.
-            else
-                choose = p[a].id < p[b].id; // Same arrival: input order.
-            if (choose) best = i;
+    bool isFull() {
+        return rear == MAX - 1;
+    }
+
+    // True when process a should run before process b.
+    bool comesFirst(int a, int b, Process p[], bool sjf) {
+        if (sjf && p[a].burst != p[b].burst) return p[a].burst < p[b].burst;
+        if (p[a].arrival != p[b].arrival) return p[a].arrival < p[b].arrival;
+        return p[a].id < p[b].id;
+    }
+
+    void enqueue(int value, Process p[], bool sjf) {
+        if (isFull()) return;
+        if (isEmpty()) front = 0;
+        // Insert in FCFS or SJF order, shifting later processes right.
+        int i = rear;
+        while (i >= front && comesFirst(value, arr[i], p, sjf)) {
+            arr[i + 1] = arr[i];
+            i--;
         }
+        arr[i + 1] = value;
+        rear++;
+    }
 
-        int selected = ready[best];
-        // Remove the chosen process from the ready queue.
-        for (int i = best; i < count - 1; i++) ready[i] = ready[i + 1];
-        count--;
-
-        return selected;
+    int dequeue() {
+        if (isEmpty()) return -1;
+        int value = arr[front];
+        if (front == rear) {
+            front = rear = -1;
+        } else {
+            front++;
+        }
+        return value;
     }
 };
 
@@ -68,7 +77,7 @@ void schedule(Process p[], int n, bool sjf)
         {
             if (!added[i] && p[i].arrival <= time)
             {
-                queue.enqueue(i);
+                queue.enqueue(i, p, sjf);
                 added[i] = true;
             }
         }
@@ -89,13 +98,13 @@ void schedule(Process p[], int n, bool sjf)
             {
                 if (!added[i] && p[i].arrival <= time)
                 {
-                    queue.enqueue(i);
+                    queue.enqueue(i, p, sjf);
                     added[i] = true;
                 }
             }
         }
 
-        Process current = p[queue.dequeue(p, sjf)];
+        Process current = p[queue.dequeue()];
 
         long long start = time;
         time += current.burst; // Non-preemptive: run this process to completion.

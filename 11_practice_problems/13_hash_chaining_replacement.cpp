@@ -6,13 +6,23 @@ class Node
 public:
     int key, slot;
     Node* next;
+
+    Node(int value, int index) {
+        key = value;
+        slot = index;
+        next = nullptr;
+    }
 };
 
 // Keep the data and its operations together in one simple class.
 class HashTable
 {
 public:
-    Node* table[12] = {};
+    Node* table[12];
+
+    HashTable() {
+        for (int i = 0; i < 12; i++) table[i] = nullptr;
+    }
 
     int freeSlot(int home)
     {
@@ -30,7 +40,7 @@ public:
         int home = key % 12;
         if (table[home] == nullptr)
         {
-            table[home] = new Node{key, home, nullptr};
+            table[home] = new Node(key, home);
             return;
         }
 
@@ -47,7 +57,7 @@ public:
             // Example: 16 may be in slot 6, but key 6 needs that home slot.
             table[empty] = table[home];
             table[empty]->slot = empty;
-            table[home] = new Node{key, home, nullptr};
+            table[home] = new Node(key, home);
             // Other nodes still point to the same relocated Node object.
         }
         else
@@ -55,7 +65,7 @@ public:
             // Same home: add the new node at the end of this collision chain.
             Node* p = table[home];
             while (p->next != nullptr) p = p->next;
-            table[empty] = new Node{key, empty, nullptr};
+            table[empty] = new Node(key, empty);
             p->next = table[empty];
         }
     }

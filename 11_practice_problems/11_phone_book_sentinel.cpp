@@ -8,12 +8,17 @@ public:
     string name, mobile; // A string keeps leading zeros in phone numbers.
 };
 
-// Keep the data and its operations together in one simple class.
+// Uses the shift-right loop from insertionSortByName() in PL/assignment10_class.cpp.
+// Sentinel search is added for this phone-book problem.
 class PhoneBook
 {
 public:
     Friend book[101]; // 100 friends and one sentinel slot.
-    int count = 0;
+    int count;
+
+    PhoneBook() {
+        count = 0;
+    }
 
     int sentinelSearch(string name)
     {
@@ -25,7 +30,7 @@ public:
         return -1; // Only the sentinel matched: friend is missing.
     }
 
-    void insert(Friend person)
+    void insertByName(Friend person)
     {
         if (count == 100) return; // Reserve the extra slot for the sentinel.
         int i = count - 1;
@@ -60,7 +65,7 @@ int main()
         cout << "Enter mobile number: ";
         if (!(cin >> person.mobile)) return 0;
         if (contacts.sentinelSearch( person.name) == -1)
-            contacts.insert( person);
+            contacts.insertByName( person);
         else cout << "Name already present.\n";
     }
     cout << "Sorted phone book:\n";
@@ -79,7 +84,7 @@ int main()
         person.name = name;
         cout << "Friend not found. Enter mobile number to insert: ";
         if (!(cin >> person.mobile)) return 0;
-        contacts.insert( person);
+        contacts.insertByName( person);
         cout << "Updated phone book:\n";
         contacts.display();
     }

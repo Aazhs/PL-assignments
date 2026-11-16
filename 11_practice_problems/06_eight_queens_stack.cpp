@@ -2,34 +2,56 @@
 #include <cstdlib>
 using namespace std;
 
-// Keep the data and its operations together in one simple class.
+// Adapted from PL/stack/stack.cpp: store integer queen columns.
+const int MAX_SIZE = 8;
 class Stack
 {
-public:
-    int stack[8];
+private:
+    int items[MAX_SIZE];
     int top = -1;
 
-    // An array is the stack: index = row, value = queen's column.
-    // top is the last occupied row; -1 means the stack is empty.
-    void push(int column)
+public:
+    // Same push/pop/peek operations as stack/stack.cpp.
+    void push(int value)
     {
-        top++;
-        stack[top] = column;
+        if (top < MAX_SIZE - 1)
+        {
+            items[++top] = value;
+        }
     }
 
-    void pop()
+    int pop()
     {
-        top--;
+        if (top == -1)
+        {
+            return -1;
+        }
+
+        return items[top--];
     }
 
+    int peek() const
+    {
+        if (top == -1)
+        {
+            return -1;
+        }
+
+        return items[top];
+    }
+
+    bool isEmpty() const
+    {
+        return top == -1;
+    }
     bool safe(int column)
     {
         int row = top + 1;
         for (int i = 0; i <= top; i++)
         {
-            if (stack[i] == column) return false; // Same column.
+            if (items[i] == column) return false; // Same column.
             // On a diagonal, the row distance equals the column distance.
-            if (abs(stack[i] - column) == row - i) return false;
+            if (abs(items[i] - column) == row - i) return false;
         }
         return true;
     }
@@ -40,25 +62,14 @@ public:
         {
             for (int column = 0; column < 8; column++)
             {
-                if (stack[row] == column) cout << "Q ";
+                if (items[row] == column) cout << "Q ";
                 else cout << ". ";
             }
             cout << endl;
         }
     }
 
-    // Read the top value without removing it.
-    int peek()
-    {
-        return stack[top];
-    }
-
-    bool isEmpty()
-    {
-        return top == -1;
-    }
-
-    int size()
+    int size() const
     {
         return top + 1;
     }
@@ -85,16 +96,14 @@ int main()
                     queens.display();
                 }
                 // Remove the last queen and look for another solution.
-                column = queens.peek() + 1;
-                queens.pop();
+                column = queens.pop() + 1;
             }
         }
         else
         {
             // No safe column: backtrack to the previous row.
             if (queens.isEmpty()) break; // All possibilities have been tried.
-            column = queens.peek() + 1;
-            queens.pop();
+            column = queens.pop() + 1;
         }
     }
     cout << "Total solutions: " << solutions << endl;

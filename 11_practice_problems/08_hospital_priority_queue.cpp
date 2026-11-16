@@ -9,55 +9,71 @@ public:
     int priority;
 };
 
-// Keep the data and its operations together in one simple class.
-class PriorityQueue
-{
-public:
-    Patient queue[100];
-    int count = 0;
+// Adapted from PL/queue.cpp: front/rear, isEmpty(), isFull(), enqueue(),
+// dequeue() and display(). Only insertion changes to respect patient priority.
+const int MAX = 100;
 
-    void insert(Patient patient)
-    {
-        if (count == 100)
-        {
-            cout << "Queue full.\n";
-            return;
-        }
-        int i = count - 1;
-        // Smaller number = higher priority. Shift less urgent patients right.
-        // Equal priorities are not shifted, so they keep their arrival order.
-        while (i >= 0 && queue[i].priority > patient.priority)
-        {
-            queue[i + 1] = queue[i];
-            i--;
-        }
-        queue[i + 1] = patient;
-        count++;
+class Queue {
+    Patient arr[MAX];
+    int front;
+    int rear;
+
+public:
+    Queue() {
+        front = -1;
+        rear = -1;
     }
 
-    void serve()
-    {
-        if (count == 0)
-        {
+    bool isEmpty() {
+        return front == -1;
+    }
+
+    bool isFull() {
+        return rear == MAX - 1;
+    }
+
+    void enqueue(Patient value) {
+        if (isFull()) {
+            cout << "Queue is full. Cannot insert.\n";
+            return;
+        }
+        if (isEmpty()) front = 0;
+
+        // Keep urgent patients near front. Equal priorities keep arrival order.
+        int i = rear;
+        while (i >= front && arr[i].priority > value.priority) {
+            arr[i + 1] = arr[i];
+            i--;
+        }
+        arr[i + 1] = value;
+        rear++;
+    }
+
+    void dequeue() {
+        if (isEmpty()) {
             cout << "Queue empty.\n";
             return;
         }
-        cout << "Serving: " << queue[0].name << endl;
-        // Remove the front patient by moving every other patient one place left.
-        for (int i = 1; i < count; i++) queue[i - 1] = queue[i];
-        count--;
+        cout << "Serving: " << arr[front].name << endl;
+        // Removing the last patient resets both indices, as in queue.cpp.
+        if (front == rear) {
+            front = rear = -1;
+        } else {
+            front++;
+        }
     }
 
-    void display()
-    {
-        for (int i = 0; i < count; i++)
-            cout << queue[i].name << "\tPriority: " << queue[i].priority << endl;
+    void display() {
+        if (isEmpty()) return;
+        for (int i = front; i <= rear; i++) {
+            cout << arr[i].name << "\tPriority: " << arr[i].priority << endl;
+        }
     }
 };
 
 int main()
 {
-    PriorityQueue appointments;
+    Queue appointments;
     Patient patient;
     int n;
     cout << "Enter number of patients (0 to 100): ";
@@ -68,12 +84,12 @@ int main()
         if (!getline(cin >> ws, patient.name)) return 0;
         cout << "Priority (1 emergency, 2 urgent, 3 routine): ";
         if (!(cin >> patient.priority) || patient.priority < 1 || patient.priority > 3) return 0;
-        appointments.insert(patient);
+        appointments.enqueue(patient);
     }
     cout << "Appointments in priority order:\n";
     appointments.display();
     // Demonstrate deletion by serving the next appointment.
-    appointments.serve();
+    appointments.dequeue();
     cout << "Remaining appointments:\n";
     appointments.display();
     return 0;

@@ -7,17 +7,33 @@ public:
     int data;
     Node* prev;
     Node* next;
+
+    Node() {
+        data = 0;
+        prev = nullptr;
+        next = nullptr;
+    }
 };
 
-// Keep the data and its operations together in one simple class.
-class DoublyLinkedList
+// Adapted from PL/linked/doubly.cpp: Dll, create(), display() and sort().
+// The merge operation alternates nodes as required by this practice problem.
+class Dll
 {
 public:
-    Node* head = nullptr;
+    Node* head;
 
-    void append(int value)
+    Dll() {
+        head = nullptr;
+    }
+
+    ~Dll() {
+        clear();
+    }
+
+    void create(int value)
     {
-        Node* temp = new Node{value, nullptr, nullptr};
+        Node* temp = new Node();
+        temp->data = value;
         if (head == nullptr)
         {
             head = temp;
@@ -38,12 +54,12 @@ public:
         for (int i = 0; i < n; i++)
         {
             if (!(cin >> value)) return false;
-            append(value);
+            create(value);
         }
         return true;
     }
 
-    void mergeAlternate(DoublyLinkedList& other)
+    void mergeAlternate(Dll& other)
     {
         if (head == nullptr)
         {
@@ -76,17 +92,49 @@ public:
         other.head = nullptr; // All its nodes now belong to this list.
     }
 
-    void sort()
-    {
-        // Compare each value with the values after it; swap if out of order.
-        for (Node* p = head; p != nullptr; p = p->next)
-            for (Node* q = p->next; q != nullptr; q = q->next)
-                if (p->data > q->data)
-                {
-                    int temp = p->data;
-                    p->data = q->data;
-                    q->data = temp;
+    void sort(){
+        // Empty and single-node lists already have the correct order.
+        if (head == nullptr || head->next == nullptr) return;
+        Node *p;
+        Node *ptr1, *ptr2, *temp;
+        bool swapped = true;
+
+        while(swapped){
+            swapped = false;
+            p = head;
+
+            while(p->next != nullptr){
+                if(p->data > p->next->data){
+                    swapped = true;
+                    ptr1 = p;
+                    ptr2 = ptr1->next;
+                    temp = ptr2->next;
+
+                    // Reconnect the node before the swapped pair (or update head).
+                    if(ptr1->prev == nullptr){
+                        head = ptr2;
+                    }
+                    else{
+                        ptr1->prev->next = ptr2;
+                    }
+
+                    // Swap neighbouring nodes, fixing both next and prev links.
+                    ptr2->next = ptr1;
+                    ptr2->prev = ptr1->prev;
+                    ptr1->prev = ptr2;
+                    ptr1->next = temp;
+
+                    // Repair the back link of the node after the pair.
+                    if(temp != nullptr){
+                        temp->prev = ptr1;
+                    }
+
+                    p = ptr2;
                 }
+
+                p = p->next;
+            }
+        }
     }
 
     void display()
@@ -113,7 +161,7 @@ public:
 
 int main()
 {
-    DoublyLinkedList first, second;
+    Dll first, second;
     cout << "First list:\n";
     bool valid = first.input();
     if (valid)
@@ -130,7 +178,5 @@ int main()
         cout << "Sorted list: ";
         first.display();
     }
-    first.clear();
-    second.clear();
     return 0;
 }

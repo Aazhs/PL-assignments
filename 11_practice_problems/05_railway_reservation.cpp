@@ -8,40 +8,67 @@ public:
     int id;
     string name;
     Node* next;
+
+    Node(int number, string passenger) {
+        id = number;
+        name = passenger;
+        next = nullptr;
+    }
 };
 
-// Keep the data and its operations together in one simple class.
-class Railway
+// Adapted from PL/linked/pizza.cpp: Queue, tail, size, add() and show().
+// Cancel by reservation ID is added for the railway application.
+class Queue
 {
 public:
-    Node* tail = nullptr;
-    int count = 0;
-    int nextId = 1;
+    Node* tail;
+    int size;
+    int capacity;
+    int nextId;
+
+    Queue() {
+        tail = nullptr;
+        size = 0;
+        capacity = 10;
+        nextId = 1;
+    }
+
+    ~Queue() {
+        clear();
+    }
+
+    bool isEmpty() {
+        return tail == nullptr;
+    }
+
+    bool isFull() {
+        return size == capacity;
+    }
 
     // tail points to the last passenger; tail->next points to the first.
-    void reserve(string name)
+    void add(string name)
     {
-        if (count == 10)
+        if (isFull())
         {
             cout << "All 10 seats are booked.\n";
             return;
         }
-        Node* temp = new Node{nextId, name, nullptr};
+        Node* temp = new Node(nextId, name);
         nextId++;
-        if (tail == nullptr) temp->next = temp; // Single node points to itself.
+        if (isEmpty()) temp->next = temp; // Single node points to itself.
         else
         {
             temp->next = tail->next;
             tail->next = temp;
         }
         tail = temp;
-        count++;
+        size++;
         cout << "Reservation ID: " << temp->id << endl;
     }
 
     void cancel(int id)
     {
-        if (tail == nullptr)
+        if (isEmpty())
         {
             cout << "Reservation not found.\n";
             return;
@@ -59,7 +86,7 @@ public:
                     if (current == tail) tail = previous;
                 }
                 delete current;
-                count--;
+                size--;
                 cout << "Reservation cancelled.\n";
                 return;
             }
@@ -69,9 +96,9 @@ public:
         cout << "Reservation not found.\n";
     }
 
-    void display()
+    void show()
     {
-        if (tail == nullptr)
+        if (isEmpty())
         {
             cout << "No reservations.\n";
             return;
@@ -103,7 +130,7 @@ public:
 
 int main()
 {
-    Railway train;
+    Queue train;
     int choice, id;
     string name;
 
@@ -116,7 +143,7 @@ int main()
         {
             cout << "Enter passenger name: ";
             if (!getline(cin >> ws, name)) break;
-            train.reserve(name);
+            train.add(name);
         }
         else if (choice == 2)
         {
@@ -124,10 +151,9 @@ int main()
             if (!(cin >> id)) break;
             train.cancel(id);
         }
-        else if (choice == 3) train.display();
+        else if (choice == 3) train.show();
         else cout << "Invalid choice.\n";
     }
 
-    train.clear();
     return 0;
 }
