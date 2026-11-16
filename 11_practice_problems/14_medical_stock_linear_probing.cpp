@@ -2,6 +2,12 @@
 #include <string>
 using namespace std;
 
+// How this program works:
+// Home address = medicine key % 9; collisions try the next slot.
+// After slot 8, probing wraps around to slot 0.
+// Without replacement: leave old records where they are.
+// With replacement: move a foreign occupant and put the new key at home.
+
 struct Medicine{
     int key = 0, quantity = 0;
     string name;
@@ -15,15 +21,18 @@ class HashTable{
 public:
     HashTable(bool mode): replacement(mode){}
     int search(int key){
+        // Calculate the bucket where this key belongs.
         int home = hash(key);
         for(int step = 0; step < 9; step++){
             int i = (home + step) % 9;
+            // No deletion is offered, so an empty slot ends this key's probe path.
             if(!table[i].occupied) return -1;
             if(table[i].key == key) return i;
         }
         return -1;
     }
     void insert(Medicine item){
+        // Reusing a medicine key updates stock instead of creating a duplicate.
         int existing = search(item.key);
         if(existing != -1){ table[existing] = item; cout << "Stock updated.\n"; return; }
         int home = hash(item.key), free = -1;
@@ -58,12 +67,14 @@ public:
         }
     }
 };
+// Program starts here: read inputs, then perform the requested operations.
 int main(){
     int mode;
     cout << "Probing mode: 1. Without replacement  2. With replacement\nEnter mode: ";
     if(!(cin >> mode) || (mode != 1 && mode != 2)) return 0;
     HashTable stock(mode == 2);
     int choice, key;
+    // Repeat the menu until Exit is chosen or the input ends.
     while(true){
         cout << "\n===== Medical Stock Menu =====\n1. Insert / update\n2. Search\n3. Display\n4. Exit\nEnter choice: ";
         if(!(cin >> choice) || choice == 4) break;

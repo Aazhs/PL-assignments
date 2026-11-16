@@ -2,6 +2,11 @@
 #include <utility>
 using namespace std;
 
+// How this program works:
+// Example: [1 3] and [2 4 5] merge as [1 2 3 4 5].
+// Save the next pointers before changing any links.
+// Every forward link has a matching backward link; then sort the values.
+
 class Node{
 public:
     int data;
@@ -12,14 +17,17 @@ class Dll{
     Node* head = nullptr;
     Node* tail = nullptr;
     void appendNode(Node* p){
-        p->prev = tail; p->next = nullptr;
+        p->prev = tail;
+        p->next = nullptr;
         if(tail) tail->next = p;
         else head = p;
         tail = p;
     }
 public:
     ~Dll(){
-        while(head){ Node* p = head; head = head->next; delete p; }
+        while(head){ Node* p = head;
+            head = head->next;
+            delete p; }
     }
     bool input(){
         int n, value;
@@ -37,12 +45,16 @@ public:
         Node* q = other.head;
         // Insert one node from the second list after each original first-list node.
         while(p && q){
+            // Remember both next nodes before inserting q after p.
             Node* nextP = p->next;
             Node* nextQ = q->next;
-            p->next = q; q->prev = p; q->next = nextP;
+            p->next = q;
+            q->prev = p;
+            q->next = nextP;
             if(nextP) nextP->prev = q;
             else tail = q;
-            p = nextP; q = nextQ;
+            p = nextP;
+            q = nextQ;
         }
         // Append leftover nodes so unequal list sizes do not lose data.
         while(q){ Node* next = q->next; appendNode(q); q = next; }
@@ -61,6 +73,7 @@ public:
         cout << "NULL\n";
     }
 };
+// Program starts here: read inputs, then perform the requested operations.
 int main(){
     Dll a, b;
     cout << "First list:\n"; if(!a.input()) return 0;

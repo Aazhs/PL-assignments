@@ -1,6 +1,11 @@
 #include <iostream>
 using namespace std;
 
+// How this program works:
+// Addition: add values at matching row/column positions.
+// Multiplication: result[i][j] = sum of A[i][k] * B[k][j].
+// Example: [1 2] multiplied by column [3 4] gives 1*3 + 2*4 = 11.
+
 // A matrix uses row and column indices in a two-dimensional array.
 class Matrix{
 public:
@@ -21,6 +26,7 @@ public:
         }
     }
 };
+// Program starts here: read inputs, then perform the requested operations.
 int main(){
     Matrix a, b;
     cout << "Matrix A:\n";
@@ -28,6 +34,7 @@ int main(){
     cout << "Matrix B:\n";
     if(!b.input()) return 0;
     int choice;
+    // Repeat the menu until Exit is chosen or the input ends.
     while(true){
         cout << "\n===== Matrix Menu =====\n1. Addition\n2. Multiplication (A * B)\n3. Exit\nEnter choice: ";
         if(!(cin >> choice) || choice == 3) break;

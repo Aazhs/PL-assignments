@@ -1,6 +1,12 @@
 #include <iostream>
 using namespace std;
 
+// How this program works:
+// Home address = score % 12; for example 16 belongs to bucket 4.
+// Scores with the same home address are joined by next pointers.
+// If another chain occupies a new key's home, move that node to a free slot.
+// Example: 16 can occupy slot 6, but inserting 6 later moves 16 elsewhere.
+
 class Node{
 public:
     int key, slot;
@@ -22,8 +28,10 @@ class HashTable{
 public:
     ~HashTable(){ for(int i = 0; i < 12; i++) delete table[i]; }
     void insert(int key){
+        // Calculate the bucket where this key belongs.
         int home = hash(key);
         if(!table[home]){ table[home] = new Node(key, home); return; }
+        // Look for an empty slot before changing the table.
         int free = freeSlot(home);
         if(free == -1){ cout << "Hash table full.\n"; return; }
         if(hash(table[home]->key) != home){
@@ -57,9 +65,11 @@ public:
         }
     }
 };
+// Program starts here: run the algorithm and display its result.
 int main(){
     HashTable scores;
     int data[12] = {10, 5, 4, 14, 15, 20, 1, 11, 6, 16, 36, 28};
+    // Insert in the exact order given in the question.
     for(int key : data) scores.insert(key);
     scores.display();
 }

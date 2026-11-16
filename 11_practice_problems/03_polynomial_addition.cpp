@@ -2,6 +2,11 @@
 #include <cmath>
 using namespace std;
 
+// How this program works:
+// Example: (2x^2 + 3) + (5x^2 + x) = 7x^2 + x + 3.
+// Each node stores just one term; next points to the following term.
+// Insert terms from both inputs into the result, combining matching powers.
+
 // One linked-list node stores one coefficient and exponent.
 class Node{
 public:
@@ -14,24 +19,40 @@ class Polynomial{
     Node* head = nullptr;
 public:
     ~Polynomial(){
-        while(head){ Node* temp = head; head = head->next; delete temp; }
+        while(head){ Node* temp = head;
+            head = head->next;
+            delete temp; }
     }
     void insert(double c, int e){
         if(c == 0) return;
-        // Keep exponents descending and combine repeated exponents.
-        Node** link = &head;
-        while(*link && (*link)->exponent > e) link = &(*link)->next;
-        if(*link && (*link)->exponent == e){
-            (*link)->coefficient += c;
-            if((*link)->coefficient == 0){
-                Node* temp = *link; *link = temp->next; delete temp;
+        // Walk with two ordinary pointers: current and the node before it.
+        // Stop where the new exponent belongs in descending order.
+        Node* current = head;
+        Node* previous = nullptr;
+        while(current != nullptr && current->exponent > e){
+            previous = current;
+            current = current->next;
+        }
+
+        if(current != nullptr && current->exponent == e){
+            // Same power: add coefficients, e.g. 2x^3 + 5x^3 = 7x^3.
+            current->coefficient += c;
+            if(current->coefficient == 0){
+                // Opposite terms cancel. Remove the node from the chain.
+                if(previous == nullptr) head = current->next;
+                else previous->next = current->next;
+                delete current;
             }
         }
         else{
+            // Different power: place a new node between previous and current.
             Node* temp = new Node(c, e);
-            temp->next = *link; *link = temp;
+            temp->next = current;
+            if(previous == nullptr) head = temp;
+            else previous->next = temp;
         }
     }
+
     bool input(){
         int n, e; double c;
         cout << "Enter number of terms: ";
@@ -58,6 +79,7 @@ public:
         cout << "\n";
     }
 };
+// Program starts here: read inputs, then perform the requested operations.
 int main(){
     Polynomial a, b, result;
     cout << "First polynomial:\n";

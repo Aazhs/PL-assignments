@@ -2,6 +2,11 @@
 #include <string>
 using namespace std;
 
+// How this program works:
+// Keep the most urgent patient at array index 0.
+// Insertion shifts less urgent patients right to make room.
+// Serving removes index 0 and shifts the remaining patients left.
+
 struct Patient{
     string name;
     int priority;
@@ -30,9 +35,11 @@ public:
         for(int i = 0; i < count; i++) cout << arr[i].name << "\tPriority: " << arr[i].priority << "\n";
     }
 };
+// Program starts here: read inputs, then perform the requested operations.
 int main(){
     PriorityQueue patients;
     int choice, priority; string name;
+    // Repeat the menu until Exit is chosen or the input ends.
     while(true){
         cout << "\n===== Hospital Menu =====\n1. Add appointment\n2. Serve next patient\n3. Display\n4. Exit\nEnter choice: ";
         if(!(cin >> choice) || choice == 4) break;

@@ -1,7 +1,10 @@
 # Practice Problems (1-14)
 
 Standalone C++ programs following the existing assignments' console-based format,
-with simple classes/functions and comments explaining the algorithms.
+with simple classes/functions and step-by-step comments explaining the algorithms.
+Rotation uses repeated shifts, polynomial insertion uses ordinary previous/current
+pointers, and scheduling uses a plain array ready queue. These choices favour
+ease of understanding over maximum efficiency.
 Compile and run each file separately (each has its own `main`):
 
 ```sh
