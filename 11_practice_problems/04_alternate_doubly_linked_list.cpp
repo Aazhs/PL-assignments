@@ -79,13 +79,17 @@ public:
     // Read how many nodes to create, then append each value in the entered order.
     bool input()
     {
+
         int n, value;
         cout << "Enter number of nodes: ";
-        if (!(cin >> n) || n < 0) return false;
+        cin >> n;
+
+        if (n < 0) return false;
         cout << "Enter values: ";
         for (int i = 0; i < n; i++)
         {
-            if (!(cin >> value)) return false;
+            cin >> value;
+
             create(value);
         }
         return true;

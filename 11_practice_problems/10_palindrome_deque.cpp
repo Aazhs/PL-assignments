@@ -10,7 +10,7 @@ madam -> compare m with m, then a with a; the middle d needs no comparison.
 madam is a palindrome; hello is not.
 
 HOW TO SOLVE:
-1. Read a line and insert every character at the rear of a circular deque.
+1. Read one word and insert every character at the rear of a circular deque.
 2. While at least two characters remain, remove one from each end.
 3. If that pair differs, return false immediately.
 4. If all pairs match, return true and print Palindrome.
@@ -18,7 +18,8 @@ HOW TO SOLVE:
 VARIABLES / IMPORTANT POINTS:
 arr holds characters; front/rear mark the ends; count tracks stored characters.
 % MAX wraps movement around the circular array (MAX = 100).
-Empty and one-character strings are palindromes. Spaces and case are significant.
+Input is one word, with case-sensitive comparison; cin >> stops at whitespace.
+The algorithm also handles an empty string, but the console input expects a word.
 pushFront() and display() are retained from the original deque implementation;
 this application only needs pushRear(), popFront(), popRear() and size().
 */
@@ -161,13 +162,16 @@ bool palindrome(string text)
     return true; // No mismatches; empty and one-character strings also pass.
 }
 
-// Read the entire line, check its length, and print the result of the deque comparison.
+// Read one word, check its length, and print the result of the deque comparison.
 int main()
 {
+
     string text;
     cout << "Enter string (up to 100 characters): ";
-    if (!getline(cin, text) || text.size() > 100) return 0;
-    // Compare exactly as entered, including spaces and letter case.
+    cin >> text;
+
+    if (text.size() > 100) return 0;
+    // Compare the input word exactly as entered, including letter case.
     if (palindrome(text)) cout << "Palindrome.\n";
     else cout << "Not a palindrome.\n";
     return 0;

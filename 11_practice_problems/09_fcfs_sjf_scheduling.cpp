@@ -166,15 +166,20 @@ void schedule(Process p[], int n, bool sjf)
 // Read the processes once, then simulate FCFS and SJF independently on the same data.
 int main()
 {
+
     Process p[100];
     int n;
     cout << "Enter process count (1 to 100): ";
-    if (!(cin >> n) || n < 1 || n > 100) return 0;
+    cin >> n;
+
+    if (n < 1 || n > 100) return 0;
     cout << "Enter arrival time and burst time for each process:\n";
     for (int i = 0; i < n; i++)
     {
         p[i].id = i + 1;
-        if (!(cin >> p[i].arrival >> p[i].burst) || p[i].arrival < 0 || p[i].burst <= 0) return 0;
+        cin >> p[i].arrival >> p[i].burst;
+
+        if (p[i].arrival < 0 || p[i].burst <= 0) return 0;
     }
     // Each call builds a fresh queue from the same original processes.
     cout << "\nFCFS:\n";

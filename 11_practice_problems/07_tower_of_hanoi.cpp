@@ -46,9 +46,12 @@ void hanoi(int n, char source, char auxiliary, char destination)
 // Read a small positive disk count and start the transfer with A as source and C as target.
 int main()
 {
+
     int n;
     cout << "Enter number of disks (1 to 15): ";
-    if (!(cin >> n) || n < 1 || n > 15) return 0;
+    cin >> n;
+
+    if (n < 1 || n > 15) return 0;
     // A is the starting rod, B is spare, and C is the target rod.
     hanoi(n, 'A', 'B', 'C');
     return 0;

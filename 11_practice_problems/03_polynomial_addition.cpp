@@ -109,14 +109,19 @@ public:
     // Read a term count followed by coefficient/exponent pairs; accept only non-negative powers.
     bool input()
     {
+
         int n, exponent;
         double coefficient;
         cout << "Enter number of terms: ";
-        if (!(cin >> n) || n < 0) return false;
+        cin >> n;
+
+        if (n < 0) return false;
         cout << "Enter coefficient and exponent for each term:\n";
         for (int i = 0; i < n; i++)
         {
-            if (!(cin >> coefficient >> exponent) || exponent < 0) return false;
+            cin >> coefficient >> exponent;
+
+            if (exponent < 0) return false;
             addTerm(coefficient, exponent);
         }
         return true;

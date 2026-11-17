@@ -18,6 +18,7 @@ HOW TO SOLVE:
 6. Shift larger names right and insert the new friend if the book has space.
 
 VARIABLES / IMPORTANT POINTS:
+Use one-word names with cin >>; use underscores for names containing spaces.
 book has 101 slots: 100 real records and one reserved sentinel at book[count].
 count does not include the sentinel, so display never shows the temporary name.
 Mobile numbers are strings to preserve leading zeros. Names are case-sensitive.
@@ -88,17 +89,22 @@ public:
 // Load unique friends, display their sorted names, then search and optionally insert one name.
 int main()
 {
+
     PhoneBook contacts;
     Friend person;
     int n;
     cout << "Enter number of friends (0 to 100): ";
-    if (!(cin >> n) || n < 0 || n > 100) return 0;
+    cin >> n;
+
+    if (n < 0 || n > 100) return 0;
     for (int i = 0; i < n; i++)
     {
         cout << "Enter name: ";
-        if (!getline(cin >> ws, person.name)) return 0;
+        cin >> person.name;
+
         cout << "Enter mobile number: ";
-        if (!(cin >> person.mobile)) return 0;
+        cin >> person.mobile;
+
         if (contacts.sentinelSearch( person.name) == -1)
             contacts.insertByName( person);
         else cout << "Name already present.\n";
@@ -108,7 +114,8 @@ int main()
 
     cout << "Enter friend name to search: ";
     string name;
-    if (!getline(cin >> ws, name)) return 0;
+    cin >> name;
+
     // Searching is allowed even when all 100 real slots are full because slot 100 is reserved.
     int index = contacts.sentinelSearch( name);
     if (index != -1)
@@ -119,7 +126,8 @@ int main()
     {
         person.name = name;
         cout << "Friend not found. Enter mobile number to insert: ";
-        if (!(cin >> person.mobile)) return 0;
+        cin >> person.mobile;
+
         contacts.insertByName( person);
         cout << "Updated phone book:\n";
         contacts.display();

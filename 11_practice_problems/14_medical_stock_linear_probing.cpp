@@ -21,6 +21,7 @@ HOW TO SOLVE:
 6. Display the table, then search for a key using the same probe sequence.
 
 VARIABLES / IMPORTANT POINTS:
+Use one-word names with cin >>; use underscores for names containing spaces.
 table stores records; occupied[i] says whether a slot contains a medicine.
 An empty search slot proves the key is absent because deletion is not offered.
 Stop after nine probes to avoid circling forever when the table is full.
@@ -128,28 +129,40 @@ public:
 // Read the probing mode and medicine records, display the table, then perform one search.
 int main()
 {
+
     HashTable stock;
     Medicine item;
     int mode, n;
     // The PDF's wording is unclear, so either probing variant can be selected.
     cout << "1. Without replacement  2. With replacement\nEnter mode: ";
-    if (!(cin >> mode) || (mode != 1 && mode != 2)) return 0;
+    cin >> mode;
+
+    if ((mode != 1 && mode != 2)) return 0;
     cout << "Enter number of medicine records (0 to 9): ";
-    if (!(cin >> n) || n < 0 || n > 9) return 0;
+    cin >> n;
+
+    if (n < 0 || n > 9) return 0;
     for (int i = 0; i < n; i++)
     {
         cout << "Enter non-negative medicine key: ";
-        if (!(cin >> item.key) || item.key < 0) return 0;
+        cin >> item.key;
+
+        if (item.key < 0) return 0;
         cout << "Enter medicine name: ";
-        if (!getline(cin >> ws, item.name)) return 0;
+        cin >> item.name;
+
         cout << "Enter quantity: ";
-        if (!(cin >> item.quantity) || item.quantity < 0) return 0;
+        cin >> item.quantity;
+
+        if (item.quantity < 0) return 0;
         stock.insert(item, mode == 2);
     }
     stock.display();
     int key;
     cout << "Enter medicine key to search: ";
-    if (!(cin >> key) || key < 0) return 0;
+    cin >> key;
+
+    if (key < 0) return 0;
     int index = stock.search(key);
     if (index == -1) cout << "Medicine not found.\n";
     else stock.show(index);

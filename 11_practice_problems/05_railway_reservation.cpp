@@ -20,6 +20,7 @@ HOW TO SOLVE:
 7. Repeat the menu so several bookings and cancellations can be practised.
 
 VARIABLES / IMPORTANT POINTS:
+Use one-word names with cin >>; use underscores for names containing spaces.
 capacity = 10; size = current bookings; nextId never reuses an old ID.
 previous is needed to unlink current during cancellation.
 For a single node, next points to itself. Removing it makes tail nullptr.
@@ -63,7 +64,7 @@ public:
         nextId = 1;
     }
 
-    // Free reservations automatically on exit, including when input ends early.
+    // Free reservations automatically when the train object leaves scope.
     ~Queue() {
         clear();
     }
@@ -175,6 +176,7 @@ public:
 // Run the booking menu; each choice calls the circular list operation for that action.
 int main()
 {
+
     Queue train;
     int choice, id;
     string name;
@@ -183,17 +185,21 @@ int main()
     while (true)
     {
         cout << "\n1. Reserve\n2. Cancel\n3. Display\n4. Exit\nEnter choice: ";
-        if (!(cin >> choice) || choice == 4) break;
+        cin >> choice;
+
+        if (choice == 4) break;
         if (choice == 1)
         {
             cout << "Enter passenger name: ";
-            if (!getline(cin >> ws, name)) break;
+            cin >> name;
+
             train.add(name);
         }
         else if (choice == 2)
         {
             cout << "Enter reservation ID: ";
-            if (!(cin >> id)) break;
+            cin >> id;
+
             train.cancel(id);
         }
         else if (choice == 3) train.show();

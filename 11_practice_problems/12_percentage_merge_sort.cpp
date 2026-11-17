@@ -81,13 +81,20 @@ void mergeSort(float arr[], int left, int right)
 // Read valid percentages, sort indices 0 through n-1, and display the ascending values.
 int main()
 {
+
     float percentage[100];
     int n;
     cout << "Enter student count (0 to 100): ";
-    if (!(cin >> n) || n < 0 || n > 100) return 0;
+    cin >> n;
+
+    if (n < 0 || n > 100) return 0;
     cout << "Enter percentages (0 to 100): ";
     for (int i = 0; i < n; i++)
-        if (!(cin >> percentage[i]) || percentage[i] < 0 || percentage[i] > 100) return 0;
+    {
+        cin >> percentage[i];
+
+        if (percentage[i] < 0 || percentage[i] > 100) return 0;
+    }
 
     mergeSort(percentage, 0, n - 1);
     cout << "Percentages in ascending order: ";

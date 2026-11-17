@@ -17,6 +17,7 @@ HOW TO SOLVE:
 5. Display the appointments, dequeue one patient, then display the remaining queue.
 
 VARIABLES / IMPORTANT POINTS:
+Use one-word names with cin >>; use underscores for names containing spaces.
 arr stores Patient objects. front points to the next patient; rear to the last.
 front == -1 means empty. Initially front and rear are both -1.
 dequeue() advances front instead of shifting the whole array.
@@ -109,17 +110,23 @@ public:
 // Read the appointments, show their priority order, serve the first, and show who remains.
 int main()
 {
+
     Queue appointments;
     Patient patient;
     int n;
     cout << "Enter number of patients (0 to 100): ";
-    if (!(cin >> n) || n < 0 || n > 100) return 0;
+    cin >> n;
+
+    if (n < 0 || n > 100) return 0;
     for (int i = 0; i < n; i++)
     {
         cout << "Enter patient name: ";
-        if (!getline(cin >> ws, patient.name)) return 0;
+        cin >> patient.name;
+
         cout << "Priority (1 emergency, 2 urgent, 3 routine): ";
-        if (!(cin >> patient.priority) || patient.priority < 1 || patient.priority > 3) return 0;
+        cin >> patient.priority;
+
+        if (patient.priority < 1 || patient.priority > 3) return 0;
         appointments.enqueue(patient);
     }
     cout << "Appointments in priority order:\n";

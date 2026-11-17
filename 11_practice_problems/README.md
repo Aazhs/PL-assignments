@@ -46,8 +46,9 @@ c++ -std=c++11 -Wall -Wextra -pedantic 01_array_rotation.cpp -o /tmp/practice
   start/finish, waiting/turnaround times, and averages.
 - Phone book reads the initial friends, shows sorted names, then searches once
   and inserts the missing friend if space is available.
-- Palindrome checks and alphabetical name ordering are case-sensitive; spaces
-  are significant. An empty string is a palindrome; maximum length is 100.
+- Names, medicine names, and palindrome text are read with `cin >>`, so enter
+  one word (use underscores for multiword names). Name sorting and palindrome
+  comparisons are case-sensitive. Palindrome text has a maximum length of 100.
 - Problem 13 mixes the terms "separate chaining" and "with replacement".
   This uses linked collision chains sharing the 12 slots (coalesced chaining),
   relocating foreign occupants so each chain starts at its home address.
@@ -55,9 +56,8 @@ c++ -std=c++11 -Wall -Wextra -pedantic 01_array_rotation.cpp -o /tmp/practice
   supplied PDF. Both with-replacement and without-replacement modes are provided
   so either interpretation can be practised. Choose the mode, enter up to nine
   records, view the table, then search for one medicine key.
-- Programs expect the prompted input types; failed input ends the program.
-  Array sizes and relevant ranges are checked. Use values whose arithmetic fits
-  the declared numeric types.
+- Enter values of the prompted type. Input uses plain `cin >>` statements
+  and basic range checks. Use values whose arithmetic fits the declared types.
 
 ## Original PL code used
 

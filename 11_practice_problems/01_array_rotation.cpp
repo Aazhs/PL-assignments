@@ -81,18 +81,26 @@ void display(int arr[], int n)
 // Read and validate input, copy the original array, and print both independent rotations.
 int main()
 {
+
     // Only indices 0 through n-1 hold input; the remaining capacity is unused.
     int n, k, arr[100], left[100], right[100];
 
     cout << "Enter size of array (1 to 100): ";
-    if (!(cin >> n) || n < 1 || n > 100) return 0;
+    cin >> n;
+
+    if (n < 1 || n > 100) return 0;
 
     cout << "Enter array elements: ";
     for (int i = 0; i < n; i++)
-        if (!(cin >> arr[i])) return 0;
+    {
+        cin >> arr[i];
+
+    }
 
     cout << "Enter k (0 or more): ";
-    if (!(cin >> k) || k < 0) return 0;
+    cin >> k;
+
+    if (k < 0) return 0;
 
     // Separate copies let us show both rotations of the original array.
     for (int i = 0; i < n; i++)

@@ -27,13 +27,17 @@ Every matrix uses at most 10 rows and 10 columns.
 using namespace std;
 
 // Each matrix has at most 10 rows and 10 columns.
-// Fill the requested rows and columns. Return false if an element cannot be read.
+// Fill the requested rows and columns using ordinary cin statements.
 bool input(int a[][10], int rows, int cols)
 {
+
     // The outer loop chooses a row; the inner loop visits each cell of that row.
     for (int i = 0; i < rows; i++)
         for (int j = 0; j < cols; j++)
-            if (!(cin >> a[i][j])) return false;
+        {
+            cin >> a[i][j];
+
+        }
     return true;
 }
 
@@ -75,15 +79,20 @@ void multiply(int a[][10], int b[][10], int r1, int c1, int c2)
 // Read both matrices, check each operation separately, then call the permitted operations.
 int main()
 {
+
     // r1/c1 describe A, and r2/c2 describe B; dimensions are checked before indexing.
     int a[10][10], b[10][10], r1, c1, r2, c2;
     cout << "Enter rows and columns of A (1 to 10): ";
-    if (!(cin >> r1 >> c1) || r1 < 1 || r1 > 10 || c1 < 1 || c1 > 10) return 0;
+    cin >> r1 >> c1;
+
+    if (r1 < 1 || r1 > 10 || c1 < 1 || c1 > 10) return 0;
     cout << "Enter A elements: ";
     if (!input(a, r1, c1)) return 0;
 
     cout << "Enter rows and columns of B (1 to 10): ";
-    if (!(cin >> r2 >> c2) || r2 < 1 || r2 > 10 || c2 < 1 || c2 > 10) return 0;
+    cin >> r2 >> c2;
+
+    if (r2 < 1 || r2 > 10 || c2 < 1 || c2 > 10) return 0;
     cout << "Enter B elements: ";
     if (!input(b, r2, c2)) return 0;
 
