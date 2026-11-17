@@ -29,7 +29,7 @@ c++ -std=c++11 -Wall -Wextra -pedantic 01_array_rotation.cpp -o /tmp/practice
 | 10 | `10_palindrome_deque.cpp` | Compare both ends using a deque |
 | 11 | `11_phone_book_sentinel.cpp` | Sentinel search and sorted insertion |
 | 12 | `12_percentage_merge_sort.cpp` | Merge sort on floating-point percentages |
-| 13 | `13_hash_chaining_replacement.cpp` | Given 12 scores, linked chaining with replacement |
+| 13 | `13_hash_chaining_replacement.cpp` | Given 12 scores, array-based chains with replacement |
 | 14 | `14_medical_stock_linear_probing.cpp` | Medical stock, hash modulo 9 |
 
 ## Conventions
@@ -50,8 +50,11 @@ c++ -std=c++11 -Wall -Wextra -pedantic 01_array_rotation.cpp -o /tmp/practice
   one word (use underscores for multiword names). Name sorting and palindrome
   comparisons are case-sensitive. Palindrome text has a maximum length of 100.
 - Problem 13 mixes the terms "separate chaining" and "with replacement".
-  This uses linked collision chains sharing the 12 slots (coalesced chaining),
-  relocating foreign occupants so each chain starts at its home address.
+  This uses an index-based linked list: `table[]` stores scores and `next[]`
+  stores links between slots. Replacement repairs indices rather than pointers.
+  There is no separate Node class or dynamic memory.
+- Medical stock uses three plain arrays in one class: `key[]`, `name[]`,
+  and `quantity[]`. There is no separate Medicine class.
 - Problem 14 says "linear probing without changing with replacement" in the
   supplied PDF. Both with-replacement and without-replacement modes are provided
   so either interpretation can be practised. Choose the mode, enter up to nine

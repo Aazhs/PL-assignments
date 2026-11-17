@@ -1,170 +1,124 @@
 /*
-PRACTICE PROBLEM 14: MEDICAL STOCK: LINEAR PROBING HASH TABLE
+QUESTION 14: MEDICAL STOCK USING LINEAR PROBING
 
-PROBLEM:
-Store medicine keys, names and quantities in a 9-slot hash table using
-hash(key) = key % 9 and linear probing for collisions.
-The PDF's replacement wording is unclear, so both variants can be selected.
+Problem: Store medicine details using key % 9. If a slot is occupied,
+try the next position until a free slot is found.
 
-EXAMPLE:
-Keys 0 and 9 both belong at index 0, so 9 can use index 1.
-Insert key 1: without replacement it uses index 2; with replacement it takes
-its home index 1 and moves key 9 to index 2.
+Simple idea: One HashTable class with three arrays. No Medicine class.
+key[i], name[i], and quantity[i] describe the medicine at position i.
+key[i] == -1 means empty, so medicine keys must be non-negative.
 
-HOW TO SOLVE:
-1. Select without-replacement or with-replacement mode.
-2. Read records and compute each key's home address.
-3. If the key exists, update its record instead of storing a duplicate.
-4. Find space by checking home, home+1, and so on, wrapping with % 9.
-5. Without replacement, store at the first empty slot. With replacement,
-   move a foreign home occupant to that slot and put the new key at home.
-6. Display the table, then search for a key using the same probe sequence.
+Steps:
+1. Choose without replacement or with replacement (the question is unclear).
+2. If a key exists, update its name and quantity.
+3. Otherwise scan from key % 9 to find a free slot, wrapping with % 9.
+4. Without replacement, use the free slot. With replacement, move a foreign
+   home occupant there first, then put the new medicine in its own home.
+5. Display the table and search for a medicine key.
 
-VARIABLES / IMPORTANT POINTS:
-Use one-word names with cin >>; use underscores for names containing spaces.
-table stores records; occupied[i] says whether a slot contains a medicine.
-An empty search slot proves the key is absent because deletion is not offered.
-Stop after nine probes to avoid circling forever when the table is full.
-Keys and quantities must be non-negative; zero is a valid occupied key.
+Example: Insert keys 0, 9, 1. Without replacement they occupy slots 0, 1, 2.
+With replacement, key 1 takes slot 1 and key 9 moves to slot 2.
+Use one-word medicine names or underscores. Input uses plain cin statements.
 */
-
 #include <iostream>
 #include <string>
 using namespace std;
 
-class Medicine
-{
-public:
-    int key, quantity;
-    string name;
-};
-
-// Keep the data and its operations together in one simple class.
 class HashTable
 {
 public:
-    Medicine table[9];
-    bool occupied[9]; // All slots start empty.
+    int key[9], quantity[9];
+    string name[9];
 
-    // Mark all nine slots unused; record values are read only after their occupied flag is set.
-    HashTable() {
-        for (int i = 0; i < 9; i++) occupied[i] = false;
+    HashTable()
+    {
+        for (int i = 0; i < 9; i++) key[i] = -1;
     }
 
-    // Probe at most nine positions starting at home; return the matching index or -1.
-    int search(int key)
+    int search(int value)
     {
-        int home = key % 9;
-        for (int step = 0; step < 9; step++)
+        // Same probing sequence for searching and inserting.
+        int home = value % 9;
+        for (int i = 0; i < 9; i++)
         {
-            int index = (home + step) % 9;
-            if (!occupied[index]) return -1; // An empty slot ends the search.
-            if (table[index].key == key) return index;
+            int p = (home + i) % 9;
+            if (key[p] == -1) return -1;
+            if (key[p] == value) return p;
         }
         return -1;
     }
 
-    // Update duplicate keys, otherwise find space and apply the selected replacement rule.
-    void insert(Medicine item, bool replacement)
+    void insert(int value, string medicine, int stock, int mode)
     {
-        // Check duplicates first: even a full table can update a record already present.
-        int existing = search(item.key);
-        if (existing != -1)
+        int p = search(value);
+        if (p == -1)
         {
-            table[existing] = item; // Same key: update the medicine's stock.
-            return;
-        }
-
-        int home = item.key % 9;
-        // Keep -1 until an empty slot is found; if it stays -1, no insertion can be made.
-        int empty = -1;
-        for (int step = 0; step < 9; step++)
-        {
-            int index = (home + step) % 9;
-            if (!occupied[index])
+            int home = value % 9;
+            p = home;
+            while (key[p] != -1)
             {
-                // Remember the first free slot and stop probing; later slots are unnecessary.
-                empty = index;
-                break;
+                p = (p + 1) % 9;
+                if (p == home)
+                {
+                    cout << "Table full.\n";
+                    return;
+                }
+            }
+
+            // In mode 2 only, reclaim home if its occupant belongs elsewhere.
+            if (mode == 2 && key[home] != -1 && key[home] % 9 != home)
+            {
+                key[p] = key[home];
+                name[p] = name[home];
+                quantity[p] = quantity[home];
+                p = home;
             }
         }
-        if (empty == -1)
-        {
-            cout << "Hash table full.\n";
-            return;
-        }
 
-        // With replacement: move a foreign occupant out of the new key's home.
-        // Without replacement: simply use the first empty slot found above.
-        if (replacement && occupied[home] && table[home].key % 9 != home)
-        {
-            // Preserve the foreign record before overwriting its old position with the new home key.
-            table[empty] = table[home];
-            table[home] = item;
-        }
-        else table[empty] = item;
-        // The previously free slot now contains a record; an occupied home stays occupied.
-        occupied[empty] = true;
+        // p is either the existing key's slot or the new insertion position.
+        key[p] = value;
+        name[p] = medicine;
+        quantity[p] = stock;
     }
 
-    // Print all slots so occupied records and collision positions can be inspected.
     void display()
     {
         cout << "Index\tKey\tMedicine\tQuantity\n";
         for (int i = 0; i < 9; i++)
         {
             cout << i << "\t";
-            if (!occupied[i]) cout << "EMPTY\n";
-            else cout << table[i].key << "\t" << table[i].name << "\t" << table[i].quantity << endl;
+            if (key[i] == -1) cout << "EMPTY\n";
+            else cout << key[i] << "\t" << name[i] << "\t" << quantity[i] << endl;
         }
-    }
-
-    // Print the record at a successful search index supplied by main().
-    void show(int index)
-    {
-        cout << table[index].name << "\tQuantity: " << table[index].quantity << endl;
     }
 };
 
-// Read the probing mode and medicine records, display the table, then perform one search.
 int main()
 {
-
-    HashTable stock;
-    Medicine item;
-    int mode, n;
-    // The PDF's wording is unclear, so either probing variant can be selected.
+    HashTable h;
+    int n, mode, value, stock;
+    string medicine;
     cout << "1. Without replacement  2. With replacement\nEnter mode: ";
     cin >> mode;
-
-    if ((mode != 1 && mode != 2)) return 0;
-    cout << "Enter number of medicine records (0 to 9): ";
+    if (mode != 1 && mode != 2) return 0;
+    cout << "Enter number of medicines (0 to 9): ";
     cin >> n;
-
     if (n < 0 || n > 9) return 0;
+
     for (int i = 0; i < n; i++)
     {
-        cout << "Enter non-negative medicine key: ";
-        cin >> item.key;
-
-        if (item.key < 0) return 0;
-        cout << "Enter medicine name: ";
-        cin >> item.name;
-
-        cout << "Enter quantity: ";
-        cin >> item.quantity;
-
-        if (item.quantity < 0) return 0;
-        stock.insert(item, mode == 2);
+        cout << "Enter key, name and quantity: ";
+        cin >> value >> medicine >> stock;
+        if (value < 0 || stock < 0) return 0;
+        h.insert(value, medicine, stock, mode);
     }
-    stock.display();
-    int key;
-    cout << "Enter medicine key to search: ";
-    cin >> key;
+    h.display();
 
-    if (key < 0) return 0;
-    int index = stock.search(key);
-    if (index == -1) cout << "Medicine not found.\n";
-    else stock.show(index);
+    cout << "Enter key to search: ";
+    cin >> value;
+    if (value < 0) return 0;
+    int p = h.search(value);
+    if (p == -1) cout << "Medicine not found.\n";
+    else cout << h.name[p] << "\tQuantity: " << h.quantity[p] << endl;
     return 0;
 }
