@@ -12,9 +12,11 @@ class Deque {
     int front;  // index of the first element (-1 when empty)
     int rear;   // index of the last element (-1 when empty)
     int count;  // number of elements
+    int mode;   // 1: input restricted, 2: output restricted
 
 public:
-    Deque() {
+    Deque(int selectedMode) {
+        mode = selectedMode;
         front = -1;
         rear = -1;
         count = 0;
@@ -29,6 +31,10 @@ public:
     }
 
     void pushFront(int value) {
+        if (mode == 1) {
+            cout << "Input-restricted deque: insert only at rear.\n";
+            return;
+        }
         if (isFull()) {
             cout << "Deque is full. Cannot insert at front.\n";
             return;
@@ -78,6 +84,10 @@ public:
     }
 
     void popRear() {
+        if (mode == 2) {
+            cout << "Output-restricted deque: delete only from front.\n";
+            return;
+        }
         if (isEmpty()) {
             cout << "Deque is empty. Cannot delete from rear.\n";
             return;
@@ -107,17 +117,28 @@ public:
     }
 };
 
-// Menu-driven program to test all deque operations
+// Shopping mall customer IDs are stored in the deque.
+// Input restricted: insert at rear, delete at either end.
+// Output restricted: insert at either end, delete at front.
 int main() {
-    Deque dq;
-    int choice, value;
+    int mode, choice = 0, value;
+    cout << "===== SHOPPING MALL DEQUE =====\n";
+    cout << "1. Input Restricted Deque\n";
+    cout << "2. Output Restricted Deque\n";
+    cout << "Select mode: ";
+    if (!(cin >> mode) || (mode != 1 && mode != 2)) {
+        cout << "Invalid mode.\n";
+        return 0;
+    }
+    Deque dq(mode);
 
     do {
-        cout << "\n===== DEQUE MENU =====\n";
-        cout << "1. Insert at Front\n";
+        cout << (mode == 1 ? "\n===== INPUT RESTRICTED DEQUE =====\n"
+                           : "\n===== OUTPUT RESTRICTED DEQUE =====\n");
+        if (mode == 2) cout << "1. Insert at Front\n";
         cout << "2. Insert at Rear\n";
         cout << "3. Delete from Front\n";
-        cout << "4. Delete from Rear\n";
+        if (mode == 1) cout << "4. Delete from Rear\n";
         cout << "5. Display\n";
         cout << "6. Exit\n";
         cout << "Enter your choice: ";
@@ -125,6 +146,7 @@ int main() {
 
         // Non-number entered: clear the error state and throw away the bad input
         if (cin.fail()) {
+            if (cin.eof()) return 0;
             cout << "Invalid input. Please enter a number.\n";
             cin.clear();
             cin.ignore(10000, '\n');
@@ -133,13 +155,17 @@ int main() {
 
         switch (choice) {
             case 1:
-                cout << "Enter value: ";
-                cin >> value;
+                if (mode == 1) {
+                    cout << "Input-restricted deque: insert only at rear.\n";
+                    break;
+                }
+                cout << "Enter customer ID: ";
+                if (!(cin >> value)) return 0;
                 dq.pushFront(value);
                 break;
             case 2:
-                cout << "Enter value: ";
-                cin >> value;
+                cout << "Enter customer ID: ";
+                if (!(cin >> value)) return 0;
                 dq.pushRear(value);
                 break;
             case 3:

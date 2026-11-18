@@ -62,9 +62,11 @@ void swapStudents(int a, int b) {
 }
 
 // Bubble sort by roll number
+// Type: comparison sort using repeated adjacent exchanges (exchange sort).
 // Compare neighbours and swap if they are in the wrong order. Each pass
 // "bubbles" the largest remaining roll number to the end. O(n^2)
 void bubbleSort() {
+    // After i passes, the last i records are already in their final positions.
     for (int i = 0; i < N - 1; i++) {
         for (int j = 0; j < N - 1 - i; j++) {
             if (students[j].rollNo > students[j + 1].rollNo) {
@@ -75,10 +77,12 @@ void bubbleSort() {
 }
 
 // Insertion sort by name
+// Type: comparison sort; decrease and conquer (sort one fewer item, then insert).
 // Like sorting playing cards in hand: the left part is already sorted;
 // take the next record (key) and slide it left into its correct place. O(n^2)
 void insertionSort() {
     for (int i = 1; i < N; i++) {
+        // Save this record before shifting larger names one position right.
         Student key = students[i];
         int j = i - 1;
 
@@ -87,13 +91,18 @@ void insertionSort() {
             j--;
         }
 
+        // j is just before the gap where the saved name belongs.
         students[j + 1] = key;
     }
 }
 
 // Selection sort by SGPA, lowest first
+// Type: comparison sort using repeated minimum selection (selection sort).
+// Find the smallest SGPA in the unsorted suffix and put it at position i.
+// The sorted prefix grows by one record each pass. O(n^2) comparisons.
 void selectionSort() {
     for (int i = 0; i < N - 1; i++) {
+        // Store the index of the smallest value seen, not the value itself.
         int minimum = i;
 
         for (int j = i + 1; j < N; j++) {
@@ -107,12 +116,16 @@ void selectionSort() {
 }
 
 // Quick sort by SGPA, highest first
+// Type: divide and conquer; partition, recursively sort both sides, no merge needed.
+// Partition around a pivot, then recursively partition the two remaining sides.
+// Average time O(n log n); worst case O(n^2) with unbalanced partitions.
 void quickSort(int low, int high) {
     // 0 or 1 element: already sorted
     if (low >= high) {
         return;
     }
 
+    // Use the last SGPA as pivot; i marks the end of the >= pivot region.
     float pivot = students[high].sgpa;
     int i = low - 1;
 
@@ -123,6 +136,7 @@ void quickSort(int low, int high) {
         }
     }
 
+    // Put the pivot between the higher/equal and lower SGPA regions.
     swapStudents(i + 1, high);
 
     int pivotPosition = i + 1;
@@ -132,6 +146,9 @@ void quickSort(int low, int high) {
 }
 
 // Linear search by SGPA
+// Type: brute force / sequential search; inspect records one at a time.
+// Check every record; no sorting is needed. Continue after a match so all
+// students with the requested SGPA are printed. O(n) time.
 void linearSearch(float key) {
     int found = 0;
 
@@ -152,6 +169,10 @@ void linearSearch(float key) {
 }
 
 // Binary search by name
+// Type: decrease and conquer by a constant factor; keep only one half each step.
+// Often grouped with divide and conquer, but only one subproblem is searched.
+// Requires names in ascending order. Compare the middle name and discard
+// the half that cannot contain the key. Each step halves the range: O(log n).
 int binarySearch(string key) {
     int low = 0;
     int high = N - 1;
@@ -163,9 +184,11 @@ int binarySearch(string key) {
             return middle;
         }
         else if (students[middle].name < key) {
+            // Key comes after the middle name, so keep only the right half.
             low = middle + 1;
         }
         else {
+            // Key comes before the middle name, so keep only the left half.
             high = middle - 1;
         }
     }
@@ -174,33 +197,42 @@ int binarySearch(string key) {
 }
 
 // Fibonacci search by roll number
+// Type: decrease and conquer; reduce the search range using Fibonacci sizes.
+// Requires ascending roll numbers. Use Fibonacci sizes to split the remaining
+// range instead of its midpoint; shrink those sizes after each comparison.
+// Time O(log n), extra space O(1).
 int fibonacciSearch(int key) {
     int a = 0;
     int b = 1;
     int fib = 1;
 
+    // Build consecutive Fibonacci numbers a, b, fib until fib covers the array.
     while (fib < N) {
         a = b;
         b = fib;
         fib = a + b;
     }
 
+    // Everything at or before offset has been eliminated from consideration.
     int offset = -1;
 
     while (fib > 1) {
         int index = offset + a;
 
+        // The Fibonacci range can exceed N; keep the probe inside the array.
         if (index >= N) {
             index = N - 1;
         }
 
         if (students[index].rollNo < key) {
+            // Discard through index and move to the next smaller Fibonacci range.
             fib = b;
             b = a;
             a = fib - b;
             offset = index;
         }
         else if (students[index].rollNo > key) {
+            // Keep the left range, shrinking by two Fibonacci levels.
             fib = a;
             b = b - a;
             a = fib - b;
@@ -210,6 +242,7 @@ int fibonacciSearch(int key) {
         }
     }
 
+    // One possible element may remain after the main probing loop.
     if (b == 1 &&
         offset + 1 < N &&
         students[offset + 1].rollNo == key) {
